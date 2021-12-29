@@ -1,2 +1,2 @@
-def print_check():
-    print('done')
+def sum(a, b):
+    return a + b
