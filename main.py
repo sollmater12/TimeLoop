@@ -1,9 +1,12 @@
-import sys
 import os
+import sys
+
 import pygame
 
+from input_box import InputBox
+
 FPS = 60
-SIZE = WIDTH, HEIGHT = 500, 500
+SIZE = WIDTH, HEIGHT = 600, 500
 SCREEN = pygame.display.set_mode(SIZE)
 CLOCK = pygame.time.Clock()
 
@@ -29,32 +32,42 @@ def terminate():
     sys.exit()
 
 
-def start_screen():
-    intro_text = ["TimeLoop", "",
-                  "Правила игры",
-                  "Если в правилах несколько строк,",
-                  "приходится выводить их построчно"]
-    fon = pygame.transform.scale(SCREEN, (WIDTH, HEIGHT))
-    SCREEN.blit(fon, (0, 0))
+def show_start_text():
+    intro_text = "Вход/Регистрация"
+    font = pygame.font.Font(None, 50)
+    string_rendered = font.render(intro_text, 1, pygame.Color('white'))
+    SCREEN.blit(string_rendered, (150, 20))
+
+    login = 'Введите имя пользователя:'
     font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('white'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        SCREEN.blit(string_rendered, intro_rect)
+    string_rendered = font.render(login, 1, pygame.Color('white'))
+    SCREEN.blit(string_rendered, (20, 250))
+
+    password_field = 'Введите пароль:'
+    font = pygame.font.Font(None, 30)
+    string_rendered = font.render(password_field, 1, pygame.Color('white'))
+    SCREEN.blit(string_rendered, (20, 301))
+
+
+def start_screen():
+    show_start_text()
+    input1 = InputBox(305, 245)
+    input2 = InputBox(305, 300)
+
+    clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                pass  # начинаем игру
+                pygame.quit()
+                sys.exit()
+            input1.handle_event(event)
+            input2.handle_event(event)
+        SCREEN.fill('black')
+        show_start_text()
+        input1.draw(SCREEN)
+        input2.draw(SCREEN)
         pygame.display.flip()
-        CLOCK.tick(FPS)
+        clock.tick(60)
 
 
 if __name__ == '__main__':
