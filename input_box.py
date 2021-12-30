@@ -44,3 +44,6 @@ class InputBox():
             self.color = (0, 128, 255)
         else:
             self.color = (255, 100, 0)
+
+    def check(self):
+        return self.text
