@@ -10,8 +10,6 @@ from input_box import InputBox
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
 SCREEN = pygame.display.set_mode(SIZE)
-BACKGROUND = pygame.Surface((800, 600))
-BACKGROUND.fill(pygame.Color('#000000'))
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
 
@@ -34,6 +32,7 @@ def load_image(filename, colorkey=None):
 
 def terminate():
     pygame.quit()
+    CONNECTION.connection.close()
     sys.exit()
 
 
@@ -53,50 +52,56 @@ def show_start_text():
     string_rendered = font.render(password_field, 1, pygame.Color('white'))
     SCREEN.blit(string_rendered, (20, 301))
 
-    pygame.draw.rect(SCREEN, 'blue', (80, 350, 150, 20))
 
-    pygame.draw.rect(SCREEN, 'red', (310, 350, 150, 20))
+def draw_buttons(manager):
+    login = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((80, 350), (100, 50)),
+                                         text='Войти',
+                                         manager=manager)
+    registration = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((310, 350), (100, 50)),
+                                                text='Регистрация',
+                                                manager=manager)
+
+    return login, registration
 
 
 def start_screen():
     show_start_text()
     input1 = InputBox(305, 245)
     input2 = InputBox(305, 300)
-
-    manager = pygame_gui.UIManager((800, 600))
-
-    hello_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((350, 275), (100, 50)),
-                                                text='Say Hello',
-                                                manager=manager)
-
+    manager = pygame_gui.UIManager((600, 500))
+    time_delta = CLOCK.tick(60) / 1000.0
+    login, registration = draw_buttons(manager)
     clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = map(float, event.pos)
-                if x in range(80, 231) and y in range(350, 370):
-                    print(CONNECTION.check_user(input1.result, input2.result))
-                elif x in range(310, 460) and y in range(350, 370):
-                    CONNECTION.registration(input1.result, input2.result)
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == hello_button:
-                        print('Hello World!')
+                    if event.ui_element == login:
+                        if CONNECTION.check_user(input1.result, input2.result):
+                            print('ты вошел')
+                        else:
+                            print('имени нет')
+                    elif event.ui_element == registration:
+                        if CONNECTION.registration(input1.result, input2.result):
+                            print('вы зарегестрировались')
+                        else:
+                            print('имя уже занято')
+            manager.process_events(event)
             input1.handle_event(event)
             input2.handle_event(event)
-            manager.process_events(event)
-        # SCREEN.fill('#000000')
+
+        SCREEN.fill('#000000')
+        manager.update(time_delta)
 
         show_start_text()
 
+        manager.draw_ui(SCREEN)
+
         input1.draw(SCREEN)
         input2.draw(SCREEN)
-
-        SCREEN.blit(BACKGROUND, (0, 0))
-        manager.draw_ui(SCREEN)
 
         pygame.display.update()
 

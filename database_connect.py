@@ -20,8 +20,14 @@ class Connection():
         request = """SELECT name, password FROM users WHERE name = ? AND password = ?"""
         result = self.cursor.execute(request, (name, password)).fetchall()
         if len(result) == 1:
+            self.connection.commit()
             return True
         return False
 
     def registration(self, name, password):
-        pass
+        request = """INSERT INTO users(name, password) VALUES(?, ?)"""
+        result = self.cursor.execute(request, (name, password))
+        if result:
+            self.connection.commit()
+            return True
+        return False
