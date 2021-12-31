@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import pygame
 import pygame_gui
@@ -78,7 +79,7 @@ def draw_buttons(manager):
     return login, registration
 
 
-def start_screen():
+def registration_screen():
     show_start_text()
     succesfull = False
     failed = False
@@ -132,7 +133,56 @@ def start_screen():
         CLOCK.tick(60)
 
 
+
+def start_screen():
+    intro_text = ["ЗАСТАВКА", "",
+                  "Правила игры",
+                  "Если в правилах несколько строк,",
+                  "приходится выводить их построчно"]
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    strt = load_image('strt.png')
+    SCREEN.blit(fon, (0, 0))
+    SCREEN.blit(strt, (15, 100))
+    strtr = strt.get_rect()
+    print(strtr)
+    # font = pygame.font.Font(None, 30)
+    # text_coord = 50
+    # for line in intro_text:
+    #     string_rendered = font.render(line, 1, pygame.Color('black'))
+    #     intro_rect = string_rendered.get_rect()
+    #     text_coord += 10
+    #     intro_rect.top = text_coord
+    #     intro_rect.x = 10
+    #     text_coord += intro_rect.height
+    #     screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 200 <= event.pos[1] <= 300:
+                strt1 = load_image('strt1.png')
+                SCREEN.blit(strt1, (15, 100))
+                pygame.display.flip()
+                time.sleep(0.25)
+                SCREEN.blit(strt, (15, 100))
+                pygame.display.flip()
+                time.sleep(1)
+                return print(0)  # начинаем игру
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(13):
+                    b = i + 5
+                    a = load_image(str(b) + '.png')
+                    SCREEN.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
+                    pygame.display.flip()
+                    time.sleep(0.0001)
+                    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+                    strt = load_image('strt.png')
+                    SCREEN.blit(fon, (0, 0))
+                    SCREEN.blit(strt, (15, 100))
+                    pygame.display.flip()
+        pygame.display.flip()
+
+
 if __name__ == '__main__':
     pygame.init()
-    start_screen()
-
+    registration_screen()
