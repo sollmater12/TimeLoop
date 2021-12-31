@@ -11,6 +11,7 @@ from input_box import InputBox
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
 SCREEN = pygame.display.set_mode(SIZE)
+SIZE_2 = WIDTH_2, HEIGHT_2 = 700, 700
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
 
@@ -40,31 +41,31 @@ def terminate():
 def show_start_text():
     intro_text = "Вход/Регистрация"
     font = pygame.font.Font(None, 50)
-    string_rendered = font.render(intro_text, 1, pygame.Color('white'))
+    string_rendered = font.render(intro_text, 1, pygame.Color(135,144,166))
     SCREEN.blit(string_rendered, (150, 20))
 
     login = 'Введите имя пользователя:'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(login, 1, pygame.Color('white'))
+    string_rendered = font.render(login, 1, pygame.Color(135,144,166))
     SCREEN.blit(string_rendered, (20, 150))
 
     password_field = 'Введите пароль:'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(password_field, 1, pygame.Color('white'))
+    string_rendered = font.render(password_field, 1, pygame.Color(135,144,166))
     SCREEN.blit(string_rendered, (20, 201))
 
 
 def succesfull_text():
     text = 'Вы успешно вошли/зарегистрировались'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color('white'))
+    string_rendered = font.render(text, 1, pygame.Color(135,144,166))
     SCREEN.blit(string_rendered, (80, 300))
 
 
 def failed_text():
     text = 'Имя уже занято/Имени не существует'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color('white'))
+    string_rendered = font.render(text, 1, pygame.Color(135,144,166))
     SCREEN.blit(string_rendered, (80, 300))
 
 
@@ -81,8 +82,7 @@ def draw_buttons(manager):
 
 def registration_screen():
     show_start_text()
-    succesfull = False
-    failed = False
+    failed = True
     input1 = InputBox(305, 145)
     input2 = InputBox(305, 200)
     manager = pygame_gui.UIManager((600, 500))
@@ -97,32 +97,24 @@ def registration_screen():
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == login:
                         if CONNECTION.check_user(input1.check(), input2.check()):
-
-                            failed = False
-                            succesfull = True
+                            return start_screen()
                         else:
-                            succesfull = False
-                            failed = True
+                            failed = False
                     elif event.ui_element == registration:
                         if CONNECTION.registration(input1.check(), input2.check()):
-                            failed = False
-                            succesfull = True
+                            return start_screen()
                         else:
-                            succesfull = False
-                            failed = True
+                            failed = False
             manager.process_events(event)
             input1.handle_event(event)
             input2.handle_event(event)
 
-        SCREEN.fill('#000000')
+        SCREEN.fill((255, 255, 255))
         manager.update(time_delta)
 
         show_start_text()
-        if succesfull:
-            succesfull_text()
-        if failed:
+        if failed is not True:
             failed_text()
-
         manager.draw_ui(SCREEN)
 
         input1.draw(SCREEN)
@@ -133,16 +125,12 @@ def registration_screen():
         CLOCK.tick(60)
 
 
-
 def start_screen():
-    intro_text = ["ЗАСТАВКА", "",
-                  "Правила игры",
-                  "Если в правилах несколько строк,",
-                  "приходится выводить их построчно"]
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    SCREEN_2 = pygame.display.set_mode(SIZE_2)
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     strt = load_image('strt.png')
-    SCREEN.blit(fon, (0, 0))
-    SCREEN.blit(strt, (15, 100))
+    SCREEN_2.blit(fon, (0, 0))
+    SCREEN_2.blit(strt, (15, 100))
     strtr = strt.get_rect()
     print(strtr)
     # font = pygame.font.Font(None, 30)
@@ -167,7 +155,7 @@ def start_screen():
                 SCREEN.blit(strt, (15, 100))
                 pygame.display.flip()
                 time.sleep(1)
-                return print(0)  # начинаем игру
+                print(0)  # начинаем игру
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(13):
                     b = i + 5
