@@ -58,7 +58,7 @@ def show_start_text():
 def succesfull_text():
     text = 'Вы успешно вошли/зарегистрировались'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color(135, 144, 165))
+    string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
     SCREEN.blit(string_rendered, (80, 300))
 
 
