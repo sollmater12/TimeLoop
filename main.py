@@ -41,31 +41,31 @@ def terminate():
 def show_start_text():
     intro_text = "Вход/Регистрация"
     font = pygame.font.Font(None, 50)
-    string_rendered = font.render(intro_text, 1, pygame.Color(135,144,166))
+    string_rendered = font.render(intro_text, 1, pygame.Color(135, 144, 166))
     SCREEN.blit(string_rendered, (150, 20))
 
     login = 'Введите имя пользователя:'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(login, 1, pygame.Color(135,144,166))
+    string_rendered = font.render(login, 1, pygame.Color(135, 144, 166))
     SCREEN.blit(string_rendered, (20, 150))
 
     password_field = 'Введите пароль:'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(password_field, 1, pygame.Color(135,144,166))
+    string_rendered = font.render(password_field, 1, pygame.Color(135, 144, 166))
     SCREEN.blit(string_rendered, (20, 201))
 
 
 def succesfull_text():
     text = 'Вы успешно вошли/зарегистрировались'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color(135,144,166))
+    string_rendered = font.render(text, 1, pygame.Color(135, 144, 165))
     SCREEN.blit(string_rendered, (80, 300))
 
 
 def failed_text():
     text = 'Имя уже занято/Имени не существует'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color(135,144,166))
+    string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
     SCREEN.blit(string_rendered, (80, 300))
 
 
