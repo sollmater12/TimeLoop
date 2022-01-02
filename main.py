@@ -10,14 +10,13 @@ from input_box import InputBox
 
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
+SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
 SCREEN = pygame.display.set_mode(SIZE)
 pygame.display.set_caption('Авторизация')
 
-SIZE_2 = WIDTH_2, HEIGHT_2 = 600, 500
-SCREEN_2 = pygame.display.set_mode(SIZE_2)
-
-SIZE_3 = WIDTH_3, HEIGHT_3 = 600, 500
-SCREEN_3 = pygame.display.set_mode(SIZE_3)
+all_sprites = pygame.sprite.Group()
+tiles_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
 
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
@@ -43,6 +42,24 @@ def terminate():
     pygame.quit()
     CONNECTION.connection.close()
     sys.exit()
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Player, self).__init__(player_group, all_sprites)
+
+
+class Field(pygame.sprite.Sprite):
+    image = load_image("mountains.png")
+
+    def __init__(self):
+        super().__init__(tiles_group)
+        self.image = Field.image
+        self.rect = self.image.get_rect()
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
+        # располагаем горы внизу
+        self.rect.bottom = HEIGHT
 
 
 def show_start_text():
@@ -91,16 +108,16 @@ def show_records():
     text = f'Ваш рекорд: {CONNECTION.show_records()}'
     font = pygame.font.Font(None, 30)
     string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
-    SCREEN_2.blit(string_rendered, (140, 100))
+    SCREEN.blit(string_rendered, (140, 100))
 
 
 def show_start_label():
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     start_label = load_image('strt.png')
-    SCREEN_2.blit(fon, (0, 0))
-    SCREEN_2.blit(start_label, (-15, 100))
+    SCREEN.blit(fon, (0, 0))
+    SCREEN.blit(start_label, (-15, 100))
     start_label = load_image('rls.png')
-    SCREEN_2.blit(start_label, (-15, 200))
+    SCREEN.blit(start_label, (-15, 200))
 
 
 def registration_screen():
@@ -149,6 +166,7 @@ def registration_screen():
 
 
 def start_screen():
+    SCREEN = pygame.display.set_mode(SIZE)
     pygame.display.set_caption('Начальный экран')
     show_start_label()
     show_records()
@@ -159,53 +177,54 @@ def start_screen():
             elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 200 <= event.pos[1] <= 300:
                 start_label = load_image('strt.png')
                 start_label_1 = load_image('strt1.png')
-                SCREEN_2.blit(start_label_1, (-15, 100))
+                SCREEN.blit(start_label_1, (-15, 100))
                 pygame.display.flip()
                 time.sleep(0.25)
-                SCREEN_2.blit(start_label, (-15, 100))
+                SCREEN.blit(start_label, (-15, 100))
                 start_label = load_image('rls.png')
-                SCREEN_2.blit(start_label, (-15, 200))
+                SCREEN.blit(start_label, (-15, 200))
                 pygame.display.flip()
                 time.sleep(1)
-                print(0)  # начинаем игру
+                return main_game()
             elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 300 <= event.pos[1] <= 400:
                 return support_screen()  # начинаем игру
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(13):
                     b = i + 5
                     a = load_image(str(b) + '.png')
-                    SCREEN_2.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
+                    SCREEN.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
                     pygame.display.flip()
                     time.sleep(0.0001)
                     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
                     start_label_1 = load_image('strt.png')
                     rules_label = load_image('rls.png')
-                    SCREEN_2.blit(fon, (0, 0))
-                    SCREEN_2.blit(start_label_1, (-15, 100))
-                    SCREEN_2.blit(rules_label, (-15, 200))
+                    SCREEN.blit(fon, (0, 0))
+                    SCREEN.blit(start_label_1, (-15, 100))
+                    SCREEN.blit(rules_label, (-15, 200))
                     show_records()
                     pygame.display.flip()
         pygame.display.flip()
 
 
 def support_screen():
+    SCREEN = pygame.display.set_mode(SIZE)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    SCREEN_3.blit(fon, (0, 0))
+    SCREEN.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 0
     intro_text = ['TimeLoop - интересная аркадная игра, ',
-           'которая увлечет не только малышей, но и взрослых людей, ',
-           'желающих с удовольствием скоротать время. ',
-           'Цель игры - преодалеть как можно большее расстояние, ',
-           'забраться на максимальную высоту. ',
-           'Представьте, что вы попали на планету, где гравитация ничтожно мала, ',
-           'а также с помощью специального таймера вы можете останавливать время. ',
-           'Да-да, вы не ослышались - останавливать время! ',
-           'Когда вы нажимаете кнопку на часах, для вас время останавливается, ',
-           'но оно начинает идти для окружающей действительности. ',
-           'Повторное нажатие кардинально меняет ситуацию с точностью наоборот - вы двигаетесь, для вас время идет, ',
-           'а все окружающее замерло. Но вот незадача - вы умеете только прыгать вертикально вверх, ',
-           'движения вбок недоступны. Чем выше вам удастся забраться, тем круче. Удачи!']
+                  'которая увлечет не только малышей, но и взрослых людей, ',
+                  'желающих с удовольствием скоротать время. ',
+                  'Цель игры - преодалеть как можно большее расстояние, ',
+                  'забраться на максимальную высоту. ',
+                  'Представьте, что вы попали на планету, где гравитация ничтожно мала, ',
+                  'а также с помощью специального таймера вы можете останавливать время. ',
+                  'Да-да, вы не ослышались - останавливать время! ',
+                  'Когда вы нажимаете кнопку на часах, для вас время останавливается, ',
+                  'но оно начинает идти для окружающей действительности. ',
+                  'Повторное нажатие кардинально меняет ситуацию с точностью наоборот - вы двигаетесь, для вас время идет, ',
+                  'а все окружающее замерло. Но вот незадача - вы умеете только прыгать вертикально вверх, ',
+                  'движения вбок недоступны. Чем выше вам удастся забраться, тем круче. Удачи!']
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
@@ -213,7 +232,7 @@ def support_screen():
         intro_rect.top = text_coord
         intro_rect.x = 10
         text_coord += intro_rect.height
-        SCREEN_3.blit(string_rendered, intro_rect)
+        SCREEN.blit(string_rendered, intro_rect)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -222,6 +241,22 @@ def support_screen():
                 start_screen()
         pygame.display.flip()
         CLOCK.tick(FPS)
+
+
+def main_game():
+    SCREEN = pygame.display.set_mode(SIZE_2)
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
+    SCREEN.blit(fon, (0, 0))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                start_screen()
+        tiles_group.draw(SCREEN)
+        tiles_group.update()
+        CLOCK.tick(FPS)
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
