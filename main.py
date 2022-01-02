@@ -11,7 +11,14 @@ from input_box import InputBox
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
 SCREEN = pygame.display.set_mode(SIZE)
-SIZE_2 = WIDTH_2, HEIGHT_2 = 700, 700
+pygame.display.set_caption('Авторизация')
+
+SIZE_2 = WIDTH_2, HEIGHT_2 = 600, 500
+SCREEN_2 = pygame.display.set_mode(SIZE_2)
+
+SIZE_3 = WIDTH_3, HEIGHT_3 = 600, 500
+SCREEN_3 = pygame.display.set_mode(SIZE_3)
+
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
 
@@ -70,14 +77,30 @@ def failed_text():
 
 
 def draw_buttons(manager):
-    login = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((80, 250), (100, 50)),
+    login = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, 250), (100, 50)),
                                          text='Войти',
                                          manager=manager)
-    registration = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((310, 250), (100, 50)),
+    registration = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 250), (100, 50)),
                                                 text='Регистрация',
                                                 manager=manager)
 
     return login, registration
+
+
+def show_records():
+    text = f'Ваш рекорд: {CONNECTION.show_records()}'
+    font = pygame.font.Font(None, 30)
+    string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
+    SCREEN_2.blit(string_rendered, (140, 100))
+
+
+def show_start_label():
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    start_label = load_image('strt.png')
+    SCREEN_2.blit(fon, (0, 0))
+    SCREEN_2.blit(start_label, (-15, 100))
+    start_label = load_image('rls.png')
+    SCREEN_2.blit(start_label, (-15, 200))
 
 
 def registration_screen():
@@ -126,49 +149,79 @@ def registration_screen():
 
 
 def start_screen():
-    SCREEN_2 = pygame.display.set_mode(SIZE_2)
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
-    strt = load_image('strt.png')
-    SCREEN_2.blit(fon, (0, 0))
-    SCREEN_2.blit(strt, (15, 100))
-    strtr = strt.get_rect()
-    print(strtr)
-    # font = pygame.font.Font(None, 30)
-    # text_coord = 50
-    # for line in intro_text:
-    #     string_rendered = font.render(line, 1, pygame.Color('black'))
-    #     intro_rect = string_rendered.get_rect()
-    #     text_coord += 10
-    #     intro_rect.top = text_coord
-    #     intro_rect.x = 10
-    #     text_coord += intro_rect.height
-    #     screen.blit(string_rendered, intro_rect)
+    pygame.display.set_caption('Начальный экран')
+    show_start_label()
+    show_records()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 200 <= event.pos[1] <= 300:
-                strt1 = load_image('strt1.png')
-                SCREEN.blit(strt1, (15, 100))
+                start_label = load_image('strt.png')
+                start_label_1 = load_image('strt1.png')
+                SCREEN_2.blit(start_label_1, (-15, 100))
                 pygame.display.flip()
                 time.sleep(0.25)
-                SCREEN.blit(strt, (15, 100))
+                SCREEN_2.blit(start_label, (-15, 100))
+                start_label = load_image('rls.png')
+                SCREEN_2.blit(start_label, (-15, 200))
                 pygame.display.flip()
                 time.sleep(1)
                 print(0)  # начинаем игру
+            elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 300 <= event.pos[1] <= 400:
+                return support_screen()  # начинаем игру
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(13):
                     b = i + 5
                     a = load_image(str(b) + '.png')
-                    SCREEN.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
+                    SCREEN_2.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
                     pygame.display.flip()
                     time.sleep(0.0001)
                     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-                    strt = load_image('strt.png')
-                    SCREEN.blit(fon, (0, 0))
-                    SCREEN.blit(strt, (15, 100))
+                    start_label_1 = load_image('strt.png')
+                    rules_label = load_image('rls.png')
+                    SCREEN_2.blit(fon, (0, 0))
+                    SCREEN_2.blit(start_label_1, (-15, 100))
+                    SCREEN_2.blit(rules_label, (-15, 200))
+                    show_records()
                     pygame.display.flip()
         pygame.display.flip()
+
+
+def support_screen():
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    SCREEN_3.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 0
+    intro_text = ['TimeLoop - интересная аркадная игра, ',
+           'которая увлечет не только малышей, но и взрослых людей, ',
+           'желающих с удовольствием скоротать время. ',
+           'Цель игры - преодалеть как можно большее расстояние, ',
+           'забраться на максимальную высоту. ',
+           'Представьте, что вы попали на планету, где гравитация ничтожно мала, ',
+           'а также с помощью специального таймера вы можете останавливать время. ',
+           'Да-да, вы не ослышались - останавливать время! ',
+           'Когда вы нажимаете кнопку на часах, для вас время останавливается, ',
+           'но оно начинает идти для окружающей действительности. ',
+           'Повторное нажатие кардинально меняет ситуацию с точностью наоборот - вы двигаетесь, для вас время идет, ',
+           'а все окружающее замерло. Но вот незадача - вы умеете только прыгать вертикально вверх, ',
+           'движения вбок недоступны. Чем выше вам удастся забраться, тем круче. Удачи!']
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        SCREEN_3.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                start_screen()
+        pygame.display.flip()
+        CLOCK.tick(FPS)
 
 
 if __name__ == '__main__':
