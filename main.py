@@ -8,6 +8,7 @@ import pygame_gui
 from database_connect import Connection
 from input_box import InputBox
 
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
 SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
@@ -47,6 +48,22 @@ def terminate():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__(player_group, all_sprites)
+        self.image = load_image('player.png')
+        self.pos_x = 300
+        self.pos_y = 800
+        self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
+        self.vx = 0
+        self.vy = 0
+
+    def change_direction(self, x, y):
+        self.vx = x
+        self.vy = y
+
+    def update(self, *args, **kwargs) -> None:
+        if self.pos_x + self.vx in range(0, 484) and self.pos_y + self.vy in range(0, 861):
+            self.pos_x += self.vx
+            self.pos_y += self.vy
+            self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
 
 
 class Field(pygame.sprite.Sprite):
@@ -59,7 +76,7 @@ class Field(pygame.sprite.Sprite):
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
         # располагаем горы внизу
-        self.rect.bottom = HEIGHT
+        self.rect.bottom = HEIGHT_2
 
 
 def show_start_text():
@@ -244,17 +261,29 @@ def support_screen():
 
 
 def main_game():
+
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     SCREEN.blit(fon, (0, 0))
+    field = Field()
+    player = Player()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                start_screen()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.change_direction(-1, 0)
+                if event.key == pygame.K_RIGHT:
+                    player.change_direction(1, 0)
+                if event.key == pygame.K_UP:
+                    player.change_direction(0, -1)
+                if event.key == pygame.K_DOWN:
+                    player.change_direction(0, 1)
+        SCREEN.blit(fon, (0, 0))
+        player.update()
         tiles_group.draw(SCREEN)
-        tiles_group.update()
+        player_group.draw(SCREEN)
         CLOCK.tick(FPS)
         pygame.display.flip()
 
