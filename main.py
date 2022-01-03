@@ -1,7 +1,7 @@
 import os
-import random
 import sys
 import time
+import random
 
 import pygame
 import pygame_gui
@@ -71,30 +71,68 @@ class Player(pygame.sprite.Sprite):
 class Field(pygame.sprite.Sprite):
     image = load_image("check_draw.png")
 
-    def __init__(self):
+    def __init__(self, fls):
         super().__init__(tiles_group)
         self.image = Field.image
         self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(50, 307)
-        self.rect.y = random.randrange(28, 900)
-        while len(pygame.sprite.spritecollide(self, tiles_group,
-                                              False)) != 1:  # проверяем что наша плита не пересекается с другими плитами
-            self.rect.x = random.randrange(200, 307)
-            self.rect.y = random.randrange(28, 900)
-        self.check_x = self.rect.x
-        self.check_y = self.rect.y
+        self.fls = fls
+        if len(self.fls) == 0:
+            self.rect.x = random.randrange(20, 290)
+            self.rect.y = random.randrange(860, 880)
+            self.fls += [(self.rect.x, self.rect.y)]
+            self.check_x = -1
+        elif len(self.fls) == 1:
+            t = random.randrange(1, 3)
+            print(t)
+            if t == 1:
+                a = self.fls[-1]
+                self.rect.x = random.randrange(20, 50)
+                self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+                self.fls += [(self.rect.x, self.rect.y)]
+                self.check_x = 1
+            elif t == 2:
+                a = self.fls[-1]
+                self.rect.x = random.randrange(250, 290)
+                self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+                self.fls += [(self.rect.x, self.rect.y)]
+                self.check_x = -1
+        # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
+        #     self.rect.x = random.randrange(200, 307)
+        #     self.rect.y = random.randrange(28, 900)
+        else:
+            a = self.fls[-1]
+            if 0 <= a[0] <= 150:
+                b = random.randrange(250, 290)
+                self.check_x = -1
+            else:
+                b = random.randrange(41, 150)
+                self.check_x = 1
+            self.rect.x = random.randrange(b - 40, b)
+            self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+            self.fls += [(self.rect.x, self.rect.y)]
         self.vx = 1
         self.image = Field.image
 
     def update(self, *args, **kwargs) -> None:
-        if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
-            self.rect.y += self.vx
-        if self.rect.y + 1 > self.check_y + 20:
-            self.vx = -1
-            self.rect.y += self.vx
-        if self.rect.y <= self.check_y - 20:
-            self.vx = 1
-            self.rect.y += self.vx
+        if self.rect.x < 290 and self.check_x == 1:
+            self.rect.x += self.vx
+        if self.rect.x == 290 and self.check_x == 1:
+            self.check_x = -1
+        if self.rect.x > 20 and self.check_x == -1:
+            self.rect.x -= self.vx
+        if self.rect.x == 20 and self.check_x == -1:
+            self.check_x = 1
+        # if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
+        #     self.rect.y += self.vx
+        # if self.rect.y + 1 > self.check_y + 20:
+        #     self.vx = -1
+        #     self.rect.y += self.vx
+        # if self.rect.y <= self.check_y - 20:
+        #     self.vx = 1
+        #     self.rect.y += self.vx
+
+    def ret_fls(self):
+        return self.fls
 
 
 def show_start_text():
@@ -297,8 +335,11 @@ def main_game():
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     SCREEN.blit(fon, (0, 0))
-    for i in range(5):
-        field = Field()
+    fls = []
+    for i in range(10):
+        field = Field(fls)
+        fls = field.ret_fls()
+    print(fls)
     player = Player()
     while True:
         for event in pygame.event.get():
