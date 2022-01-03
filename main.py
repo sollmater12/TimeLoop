@@ -81,7 +81,7 @@ class Field(pygame.sprite.Sprite):
             self.fls += [(self.rect.x, self.rect.y)]
             self.check_x = -1
         elif len(self.fls) == 1:
-            t = random.randrange(1, 2)
+            t = random.randrange(1, 3)
             print(t)
             if t == 1:
                 a = self.fls[-1]
