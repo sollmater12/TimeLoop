@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import random
 
 import pygame
 import pygame_gui
@@ -67,16 +68,31 @@ class Player(pygame.sprite.Sprite):
 
 
 class Field(pygame.sprite.Sprite):
-    image = load_image("mountains.png")
+    image = load_image("check_draw.png")
 
     def __init__(self):
         super().__init__(tiles_group)
         self.image = Field.image
         self.rect = self.image.get_rect()
-        # вычисляем маску для эффективного сравнения
-        self.mask = pygame.mask.from_surface(self.image)
-        # располагаем горы внизу
-        self.rect.bottom = HEIGHT_2
+        self.rect.x = random.randrange(50, 307)
+        self.rect.y = random.randrange(28, 900)
+        while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
+            self.rect.x = random.randrange(200, 307)
+            self.rect.y = random.randrange(28, 900)
+        self.check_x = self.rect.x
+        self.check_y = self.rect.y
+        self.vx = 1
+        self.image = Field.image
+
+    def update(self, *args, **kwargs) -> None:
+        if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
+            self.rect.y += self.vx
+        if self.rect.y + 1 > self.check_y + 20:
+            self.vx = -1
+            self.rect.y += self.vx
+        if self.rect.y <= self.check_y - 20:
+            self.vx = 1
+            self.rect.y += self.vx
 
 
 def show_start_text():
@@ -261,11 +277,11 @@ def support_screen():
 
 
 def main_game():
-
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     SCREEN.blit(fon, (0, 0))
-    field = Field()
+    for i in range(5):
+        field = Field()
     player = Player()
     while True:
         for event in pygame.event.get():
@@ -280,8 +296,11 @@ def main_game():
                     player.change_direction(0, -1)
                 if event.key == pygame.K_DOWN:
                     player.change_direction(0, 1)
+                if event.key == pygame.K_SPACE:
+                    player.change_direction(0, 0)
         SCREEN.blit(fon, (0, 0))
         player.update()
+        tiles_group.update()
         tiles_group.draw(SCREEN)
         player_group.draw(SCREEN)
         CLOCK.tick(FPS)
