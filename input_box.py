@@ -9,8 +9,8 @@ class InputBox():
 
         self.inputBox = pygame.Rect(x, y, 140, 32)
 
-        self.colourInactive = pygame.Color('white')
-        self.colourActive = pygame.Color('grey')
+        self.colourInactive = pygame.Color(135,144,166)
+        self.colourActive = pygame.Color('black')
         self.colour = self.colourInactive
 
         self.text = ''

@@ -14,11 +14,13 @@ class Connection():
             password INT NOT NULL
         );"""
         self.cursor.execute(make_table)
+        self.id = 0
 
     def check_user(self, name, password):
-        request = """SELECT name, password FROM users WHERE name = ? AND password = ?"""
+        request = """SELECT id, name, password FROM users WHERE name = ? AND password = ?"""
         result = self.cursor.execute(request, (name, password)).fetchall()
         if len(result) == 1:
+            self.id = int(list(result)[0][0])
             self.connection.commit()
             return True
         return False
@@ -44,6 +46,12 @@ class Connection():
 """
         self.cursor.execute(req)
         request = """SELECT id FROM users WHERE name = ?"""
-        result = self.cursor.execute(request, (name, )).fetchone()
+        result = self.cursor.execute(request, (name,)).fetchone()
         request = """INSERT INTO records(id, record) VALUES(?, ?)"""
         self.cursor.execute(request, (result[0], 0))
+        self.id = result[0]
+
+    def show_records(self):
+        request = """SELECT record FROM records WHERE id = ?"""
+        result = self.cursor.execute(request, (self.id,)).fetchall()
+        return result[0][0]
