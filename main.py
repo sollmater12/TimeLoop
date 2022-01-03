@@ -1,7 +1,7 @@
 import os
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
@@ -9,7 +9,7 @@ import pygame_gui
 from database_connect import Connection
 from input_box import InputBox
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30) # меняем расположение окна
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
 SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
@@ -22,6 +22,7 @@ player_group = pygame.sprite.Group()
 
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
+PLAYER_TURN = True
 
 
 def load_image(filename, colorkey=None):
@@ -76,7 +77,8 @@ class Field(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(50, 307)
         self.rect.y = random.randrange(28, 900)
-        while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
+        while len(pygame.sprite.spritecollide(self, tiles_group,
+                                              False)) != 1:  # проверяем что наша плита не пересекается с другими плитами
             self.rect.x = random.randrange(200, 307)
             self.rect.y = random.randrange(28, 900)
         self.check_x = self.rect.x
@@ -276,7 +278,22 @@ def support_screen():
         CLOCK.tick(FPS)
 
 
+def player_movement_label():
+    text = 'Ваш ход'
+    font = pygame.font.Font(None, 45)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (0, 0))
+
+
+def tile_movement_label():
+    text = 'Ход игры'
+    font = pygame.font.Font(None, 45)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (0, 0))
+
+
 def main_game():
+    global PLAYER_TURN
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     SCREEN.blit(fon, (0, 0))
@@ -287,20 +304,21 @@ def main_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    player.change_direction(-1, 0)
-                if event.key == pygame.K_RIGHT:
-                    player.change_direction(1, 0)
+            if event.type == pygame.KEYDOWN:  # добавляем передвижение по кнопкам и отправляем направление в функциюя класса
                 if event.key == pygame.K_UP:
                     player.change_direction(0, -1)
                 if event.key == pygame.K_DOWN:
                     player.change_direction(0, 1)
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:  # при нажатии на пробел меняем ход персонажа на движение плит и наоборот
                     player.change_direction(0, 0)
+                    PLAYER_TURN = not PLAYER_TURN
         SCREEN.blit(fon, (0, 0))
-        player.update()
-        tiles_group.update()
+        if PLAYER_TURN:  # если ход персонажа, то выводит этот текст на экран и обновляем только движения персонажа
+            player_movement_label()
+            player.update()
+        else:
+            tile_movement_label()
+            tiles_group.update()
         tiles_group.draw(SCREEN)
         player_group.draw(SCREEN)
         CLOCK.tick(FPS)
