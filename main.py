@@ -14,7 +14,7 @@ FPS = 60
 SIZE = WIDTH, HEIGHT = 507, 900
 SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
 SCREEN = pygame.display.set_mode(SIZE)
-pygame.display.set_caption('Авторизация')
+pygame.display.set_caption('TimeLoop')
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -135,41 +135,43 @@ class Field(pygame.sprite.Sprite):
 
 
 def show_start_text():
-    intro_text = "Вход/Регистрация"
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    SCREEN.blit(fon, (0, 0))
+    intro_text = "Вход / Регистрация"
     font = pygame.font.Font(None, 50)
-    string_rendered = font.render(intro_text, 1, pygame.Color(135, 144, 166))
-    SCREEN.blit(string_rendered, (150, 20))
+    string_rendered = font.render(intro_text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (100, 100))
 
-    login = 'Введите имя пользователя:'
+    login = 'Введите никнейм:'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(login, 1, pygame.Color(135, 144, 166))
-    SCREEN.blit(string_rendered, (20, 150))
+    string_rendered = font.render(login, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (40, 255))
 
     password_field = 'Введите пароль:'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(password_field, 1, pygame.Color(135, 144, 166))
-    SCREEN.blit(string_rendered, (20, 201))
+    string_rendered = font.render(password_field, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (40, 315))
 
 
 def succesfull_text():
-    text = 'Вы успешно вошли/зарегистрировались'
+    text = 'Вы успешно вошли / зарегистрировались'
     font = pygame.font.Font(None, 30)
     string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
-    SCREEN.blit(string_rendered, (80, 300))
+    SCREEN.blit(string_rendered, (80, 600))
 
 
 def failed_text():
-    text = 'Имя уже занято/Имени не существует'
+    text = 'Имя уже занято / Имени не существует'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
-    SCREEN.blit(string_rendered, (80, 300))
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (60, 600))
 
 
 def draw_buttons(manager):
-    login = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, 250), (100, 50)),
-                                         text='Войти',
+    login = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((130, 400), (100, 50)),
+                                         text='Вход',
                                          manager=manager)
-    registration = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 250), (100, 50)),
+    registration = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((280, 400), (100, 50)),
                                                 text='Регистрация',
                                                 manager=manager)
 
@@ -177,26 +179,26 @@ def draw_buttons(manager):
 
 
 def show_records():
-    text = f'Ваш рекорд: {CONNECTION.show_records()}'
+    text = f'Мой рекорд: {CONNECTION.show_records()}'
     font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
-    SCREEN.blit(string_rendered, (140, 100))
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (180, 200))
 
 
 def show_start_label():
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    start_label = load_image('strt.png')
+    start_label = pygame.transform.scale(load_image('strt.png'), (100, 100))
     SCREEN.blit(fon, (0, 0))
-    SCREEN.blit(start_label, (-15, 100))
-    start_label = load_image('rls.png')
-    SCREEN.blit(start_label, (-15, 200))
+    SCREEN.blit(start_label, (200, 300))
+    start_label = pygame.transform.scale(load_image('rls.png'), (100, 100))
+    SCREEN.blit(start_label, (200, 450))
 
 
 def registration_screen():
     show_start_text()
     failed = True
-    input1 = InputBox(305, 145)
-    input2 = InputBox(305, 200)
+    input1 = InputBox(270, 250)
+    input2 = InputBox(270, 310)
     manager = pygame_gui.UIManager((600, 500))
     time_delta = CLOCK.tick(60) / 1000.0
     login, registration = draw_buttons(manager)
@@ -239,27 +241,43 @@ def registration_screen():
 
 def start_screen():
     SCREEN = pygame.display.set_mode(SIZE)
-    pygame.display.set_caption('Начальный экран')
+    pygame.display.set_caption('TimeLoop')
     show_start_label()
     show_records()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 200 <= event.pos[1] <= 300:
-                start_label = load_image('strt.png')
-                start_label_1 = load_image('strt1.png')
-                SCREEN.blit(start_label_1, (-15, 100))
+            elif event.type == pygame.MOUSEBUTTONDOWN and (200 <= event.pos[0] <= 300) and (300 <= event.pos[1] <= 400):
+                fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+                start_label = pygame.transform.scale(load_image('strt.png'), (100, 100))
+                start_label_1 = pygame.transform.scale(load_image('strt1.png'), (100, 100))
+                start_label2 = pygame.transform.scale(load_image('rls.png'), (100, 100))
+                SCREEN.blit(start_label_1, (200, 300))
                 pygame.display.flip()
                 time.sleep(0.25)
-                SCREEN.blit(start_label, (-15, 100))
-                start_label = load_image('rls.png')
-                SCREEN.blit(start_label, (-15, 200))
+                SCREEN.blit(fon, (0, 0))
+                show_records()
+                SCREEN.blit(start_label, (200, 300))
+                SCREEN.blit(start_label2, (200, 450))
                 pygame.display.flip()
-                time.sleep(1)
+                time.sleep(0.5)
                 return main_game()
-            elif event.type == pygame.MOUSEBUTTONDOWN and 140 <= event.pos[0] <= 560 and 300 <= event.pos[1] <= 400:
-                return support_screen()  # начинаем игру
+            elif event.type == pygame.MOUSEBUTTONDOWN and 200 <= event.pos[0] <= 300 and 450 <= event.pos[1] <= 550:
+                fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+                start_label = pygame.transform.scale(load_image('strt.png'), (100, 100))
+                start_label_1 = pygame.transform.scale(load_image('rls1.png'), (100, 100))
+                start_label2 = pygame.transform.scale(load_image('rls.png'), (100, 100))
+                SCREEN.blit(start_label_1, (200, 450))
+                pygame.display.flip()
+                time.sleep(0.25)
+                SCREEN.blit(fon, (0, 0))
+                show_records()
+                SCREEN.blit(start_label, (200, 300))
+                SCREEN.blit(start_label2, (200, 450))
+                pygame.display.flip()
+                time.sleep(0.5)
+                return support_screen()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(13):
                     b = i + 5
@@ -283,20 +301,30 @@ def support_screen():
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     SCREEN.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 0
+    text_coord = 20
     intro_text = ['TimeLoop - интересная аркадная игра, ',
-                  'которая увлечет не только малышей, но и взрослых людей, ',
-                  'желающих с удовольствием скоротать время. ',
-                  'Цель игры - преодалеть как можно большее расстояние, ',
-                  'забраться на максимальную высоту. ',
-                  'Представьте, что вы попали на планету, где гравитация ничтожно мала, ',
-                  'а также с помощью специального таймера вы можете останавливать время. ',
-                  'Да-да, вы не ослышались - останавливать время! ',
-                  'Когда вы нажимаете кнопку на часах, для вас время останавливается, ',
-                  'но оно начинает идти для окружающей действительности. ',
-                  'Повторное нажатие кардинально меняет ситуацию с точностью наоборот - вы двигаетесь, для вас время идет, ',
-                  'а все окружающее замерло. Но вот незадача - вы умеете только прыгать вертикально вверх, ',
-                  'движения вбок недоступны. Чем выше вам удастся забраться, тем круче. Удачи!']
+                  'Которая увлечет не только малышей, ',
+                  'Но и взрослых людей, ',
+                  'Желающих с удовольствием скоротать время. ',
+                  'Цель игры - преодалеть как можно ',
+                  'Большее расстояние, ',
+                  'Забраться на максимальную высоту. ',
+                  'Представьте, что вы попали на планету, ',
+                  'Где гравитация ничтожно мала, ',
+                  'А также с помощью специального таймера ',
+                  'Вы можете останавливать время. ',
+                  'Да, вы не ослышались - останавливать время! ',
+                  'Когда вы нажимаете кнопку на часах, ',
+                  'Для вас время останавливается, ',
+                  'Но оно начинает идти для окружающей ',
+                  'Действительности. ',
+                  'Повторное нажатие полностью меняет ситуацию',
+                  'С точностью наоборот - вы двигаетесь, ',
+                  'Для вас время идет, ',
+                  'А все окружающее замерло. Но вот незадача - ',
+                  'Вы умеете только прыгать вертикально вверх, ',
+                  'Движения вбок недоступны. Чем выше вам ',
+                  'Удастся забраться, тем круче. Удачи!']
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
@@ -305,11 +333,13 @@ def support_screen():
         intro_rect.x = 10
         text_coord += intro_rect.height
         SCREEN.blit(string_rendered, intro_rect)
+        ret = pygame.transform.scale(load_image('return.png'), (100, 100))
+        SCREEN.blit(ret, (200, 750))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and 200 <= event.pos[0] <= 300 and 750 <= event.pos[1] <= 850:
                 start_screen()
         pygame.display.flip()
         CLOCK.tick(FPS)
