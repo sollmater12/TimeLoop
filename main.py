@@ -1,7 +1,7 @@
 import os
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
@@ -9,7 +9,7 @@ import pygame_gui
 from database_connect import Connection
 from input_box import InputBox
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30) # меняем расположение окна
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)  # меняем расположение окна
 FPS = 60
 SIZE = WIDTH, HEIGHT = 600, 500
 SIZE_2 = WIDTH_2, HEIGHT_2 = 508, 900
@@ -23,6 +23,9 @@ player_group = pygame.sprite.Group()
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
 PLAYER_TURN = True
+IS_JUMPING = False
+FIRST_X = 0
+FIRST_Y = 0
 
 
 def load_image(filename, colorkey=None):
@@ -51,27 +54,37 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__(player_group, all_sprites)
         self.image = load_image('player.png')
-        self.pos_x = 300
-        self.pos_y = 800
+        self.pos_x = FIRST_X + 100
+        self.pos_y = FIRST_Y - 41
         self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
+        self.jumping = False
+        self.count = 0
+        self.check_jump = 20
+        self.check_y = 0
         self.vx = 0
         self.vy = 0
+        self.jumpCount = 10
+        self.isJump = False
 
-    def change_direction(self, x, y):
-        self.vx = x
-        self.vy = y
-
-    def update(self, *args, **kwargs) -> None:
-        if self.pos_x + self.vx in range(0, 484) and self.pos_y + self.vy in range(0, 861):
-            self.pos_x += self.vx
-            self.pos_y += self.vy
-            self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
+    def jump(self):
+        if len(pygame.sprite.spritecollide(self, tiles_group, False)) == 1:
+            if self.isJump:
+                if self.jumpCount >= -10:
+                    neg = 0.5
+                    if self.jumpCount < 0:
+                        neg = -1
+                    self.rect.y -= self.jumpCount ** 2 * 0.4 * neg
+                    self.jumpCount -= 1
+                else:
+                    self.isJump = False
+                    self.jumpCount = 10
 
 
 class Field(pygame.sprite.Sprite):
     image = load_image("check_draw.png")
 
     def __init__(self, fls):
+        global FIRST_X, FIRST_Y
         super().__init__(tiles_group)
         self.image = Field.image
         self.rect = self.image.get_rect()
@@ -81,6 +94,8 @@ class Field(pygame.sprite.Sprite):
             self.rect.y = random.randrange(860, 880)
             self.fls += [(self.rect.x, self.rect.y)]
             self.check_x = -1
+            FIRST_X = self.rect.x
+            FIRST_Y = self.rect.y
         elif len(self.fls) == 1:
             t = random.randrange(1, 3)
             print(t)
@@ -329,14 +344,15 @@ def tile_movement_label():
     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
     SCREEN.blit(string_rendered, (0, 0))
 
-
+fls = []
+field = Field(fls)
+fls = field.ret_fls()
 def main_game():
-    global PLAYER_TURN
+    global PLAYER_TURN, IS_JUMPING, fls
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     SCREEN.blit(fon, (0, 0))
-    fls = []
-    for i in range(10):
+    for i in range(9):
         field = Field(fls)
         fls = field.ret_fls()
     print(fls)
@@ -347,16 +363,16 @@ def main_game():
                 terminate()
             if event.type == pygame.KEYDOWN:  # добавляем передвижение по кнопкам и отправляем направление в функциюя класса
                 if event.key == pygame.K_UP:
-                    player.change_direction(0, -1)
-                if event.key == pygame.K_DOWN:
-                    player.change_direction(0, 1)
+                    player.isJump = True
+                # if event.key == pygame.K_DOWN:
+                #     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:  # при нажатии на пробел меняем ход персонажа на движение плит и наоборот
-                    player.change_direction(0, 0)
                     PLAYER_TURN = not PLAYER_TURN
+                    player.isJump = False
         SCREEN.blit(fon, (0, 0))
         if PLAYER_TURN:  # если ход персонажа, то выводит этот текст на экран и обновляем только движения персонажа
             player_movement_label()
-            player.update()
+            player.jump()
         else:
             tile_movement_label()
             tiles_group.update()
