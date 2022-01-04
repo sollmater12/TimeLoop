@@ -11,7 +11,7 @@ from input_box import InputBox
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)
 FPS = 60
-SIZE = WIDTH, HEIGHT = 600, 500
+SIZE = WIDTH, HEIGHT = 507, 900
 SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
 SCREEN = pygame.display.set_mode(SIZE)
 pygame.display.set_caption('TimeLoop')
