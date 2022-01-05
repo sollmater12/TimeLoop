@@ -190,7 +190,8 @@ class Lava(pygame.sprite.Sprite):
         self.image = Lava.image1
 
     def update(self, *args, **kwargs) -> None:
-        self.rect.y -= self.vx
+        self.rect.y -= self.vx / FPS
+        CLOCK.tick(FPS)
 
 
 def show_start_text():
