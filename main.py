@@ -113,13 +113,13 @@ class Field(pygame.sprite.Sprite):
         self.image = Field.image
 
     def update(self, *args, **kwargs) -> None:
-        if self.rect.x < 290 and self.check_x == 1:
+        if self.rect.x < 400 and self.check_x == 1:
             self.rect.x += self.vx
-        if self.rect.x == 290 and self.check_x == 1:
+        if self.rect.x == 400 and self.check_x == 1:
             self.check_x = -1
-        if self.rect.x > 20 and self.check_x == -1:
+        if self.rect.x > 5 and self.check_x == -1:
             self.rect.x -= self.vx
-        if self.rect.x == 20 and self.check_x == -1:
+        if self.rect.x == 5 and self.check_x == -1:
             self.check_x = 1
         # if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
         #     self.rect.y += self.vx
@@ -132,6 +132,56 @@ class Field(pygame.sprite.Sprite):
 
     def ret_fls(self):
         return self.fls
+
+
+class Teleport(pygame.sprite.Sprite):
+    image = load_image("tile1.png")
+
+    def __init__(self, fls):
+        super().__init__(tiles_group)
+        self.image = Teleport.image
+        self.rect = self.image.get_rect()
+        self.fls = fls
+        a = self.fls[-1]
+        self.rect.x = random.randrange(20, 290)
+        self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+        self.fls += [(self.rect.x, self.rect.y)]
+        direc = [-1, 1]
+        self.check_x = random.choice(direc)
+        self.vx = 1
+        self.image = Teleport.image
+
+    def update(self, *args, **kwargs) -> None:
+        if self.rect.x < 400 and self.check_x == 1:
+            self.rect.x += self.vx
+        if self.rect.x == 400 and self.check_x == 1:
+            self.check_x = -1
+        if self.rect.x > 5 and self.check_x == -1:
+            self.rect.x -= self.vx
+        if self.rect.x == 5 and self.check_x == -1:
+            self.check_x = 1
+
+    def ret_fls(self):
+        return self.fls
+
+
+class Lava(pygame.sprite.Sprite):
+    image = load_image("lava.png")
+    image1 = load_image("lava1.png")
+    flag = True
+
+    def __init__(self):
+        super().__init__(tiles_group)
+        self.image = Lava.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 890
+        self.check_x = 1
+        self.vx = 1
+        self.image = Lava.image
+
+    def update(self, *args, **kwargs) -> None:
+        self.rect.y -= self.vx
 
 
 def show_start_text():
@@ -348,13 +398,22 @@ def support_screen():
 def main_game():
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
+    hat = load_image('hat.png')
+    hat0 = load_image('hat0.png')
+    hat1 = load_image('hat1.png')
     SCREEN.blit(fon, (0, 0))
+    SCREEN.blit(hat, (50, 50))
     fls = []
-    for i in range(10):
-        field = Field(fls)
-        fls = field.ret_fls()
+    for i in range(9):
+        if i == 8:
+            field = Teleport(fls)
+            fls = field.ret_fls()
+        else:
+            field = Field(fls)
+            fls = field.ret_fls()
     print(fls)
     player = Player()
+    lava = Lava()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -371,10 +430,11 @@ def main_game():
                 if event.key == pygame.K_SPACE:
                     player.change_direction(0, 0)
         SCREEN.blit(fon, (0, 0))
+        SCREEN.blit(hat, (0, 0))
         player.update()
         tiles_group.update()
-        tiles_group.draw(SCREEN)
         player_group.draw(SCREEN)
+        tiles_group.draw(SCREEN)
         CLOCK.tick(FPS)
         pygame.display.flip()
 
