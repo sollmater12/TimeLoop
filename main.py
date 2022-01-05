@@ -66,6 +66,14 @@ class Player(pygame.sprite.Sprite):
             self.pos_y += self.vy
             self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
 
+    def get_coord(self):
+        return [self.pos_x, self.pos_y]
+
+    # def jump(self):
+    #     for i in range(200):
+    #         v = 1 - (1 / 200) * i
+    #         self.pos_y -= v - (1 / 200) / 2
+
 
 class Field(pygame.sprite.Sprite):
     image = load_image("check_draw.png")
@@ -507,7 +515,7 @@ def main_game():
                 if event.key == pygame.K_DOWN:
                     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:
-                    player.change_direction(0, 0)
+                    pass
             if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[1] <= 50:
                 SCREEN.blit(hat0, (0, 0))
                 SCREEN.blit(hat1, (0, 0))
@@ -528,13 +536,15 @@ def main_game():
             return end_game_screen()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
-        player.update()
-        tiles_group.update()
-        player_group.draw(SCREEN)
-        tiles_group.draw(SCREEN)
         if b:
+            player.update()
+            player_group.draw(SCREEN)
+            tiles_group.draw(SCREEN)
             SCREEN.blit(clc, (430, 790))
         else:
+            tiles_group.update()
+            player_group.draw(SCREEN)
+            tiles_group.draw(SCREEN)
             SCREEN.blit(clc1, (430, 790))
         CLOCK.tick(FPS)
         pygame.display.flip()
