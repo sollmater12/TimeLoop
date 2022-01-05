@@ -69,9 +69,12 @@ class Player(pygame.sprite.Sprite):
         self.check_distance = 0
 
     def jump(self):
-        h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
-        self.rect.y -= h
-        self.check_distance += 1
+        if self.check_distance != len(check):
+            h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
+            if self.isJump:
+                pass
+            self.rect.y -= h
+            self.check_distance += 1
         # if self.isJump:
         #     if self.jumpCount >= -10:
         #         if self.jumpCount <= 0:
@@ -90,6 +93,8 @@ class Player(pygame.sprite.Sprite):
         if not len(check):
             self.rect.y += self.vy ** 2
         else:
+            check_y = check[0].rect.y
+            self.check_distance = check_2[check_y]
             self.vy = 2
             if PLAYER_TURN is not True:
                 if check[-1].rect.x < 290 and check[-1].check_x == 1:
@@ -147,7 +152,7 @@ class Field(pygame.sprite.Sprite):
             self.rect.x = random.randrange(b - 40, b)
             self.rect.y = random.randrange(a[1] - 140, a[1] - 120)
             self.fls += [(self.rect.x, self.rect.y)]
-        self.vx = 10
+        self.vx = 1
         self.image = Field.image
 
     def update(self, *args, **kwargs) -> None:
@@ -399,9 +404,11 @@ def tile_movement_label():
 
 fls = []
 check = []
+check_2 = {}
 field = Field(fls)
 fls = field.ret_fls()
 check.append(fls[-1])
+check_2[check[-1][-1]] = 0
 
 
 def end_game_screen():
@@ -417,7 +424,7 @@ def end_game_screen():
 
 
 def main_game():
-    global PLAYER_TURN, IS_JUMPING, fls, check
+    global PLAYER_TURN, IS_JUMPING, fls, check, check_2
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     SCREEN.blit(fon, (0, 0))
@@ -425,8 +432,10 @@ def main_game():
         field = Field(fls)
         fls = field.ret_fls()
         check.append(field.ret_fls()[-1])
+        check_2[check[-1][-1]] = i + 1
     print(fls)
     print(check)
+    print(check_2)
     player = Player()
     while True:
         for event in pygame.event.get():
