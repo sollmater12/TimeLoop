@@ -422,6 +422,43 @@ def stop_menu():
                 start_screen()
 
 
+def end_game_screen():
+    global all_sprites, tiles_group, lava_group, player_group
+    SCREEN = pygame.display.set_mode(SIZE_2)
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
+    SCREEN.blit(fon, (0, 0))
+    text = f'Вы проиграли'
+    font = pygame.font.Font(None, 45)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (145, 300))
+    manager = pygame_gui.UIManager((507, 900))
+    time_delta = CLOCK.tick(60) / 1000.0
+    restart, menu = draw_buttons_2(manager)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == restart:
+                        all_sprites = pygame.sprite.Group()
+                        tiles_group = pygame.sprite.Group()
+                        lava_group = pygame.sprite.Group()
+                        player_group = pygame.sprite.Group()
+                        return main_game()
+                    elif event.ui_element == menu:
+                        all_sprites = pygame.sprite.Group()
+                        tiles_group = pygame.sprite.Group()
+                        lava_group = pygame.sprite.Group()
+                        player_group = pygame.sprite.Group()
+                        return start_screen()
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(SCREEN)
+        CLOCK.tick(FPS)
+        pygame.display.flip()
+
+
 def main_game():
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
@@ -476,7 +513,8 @@ def main_game():
                     b = False
                 else:
                     b = True
-
+        if pygame.sprite.collide_mask(player, lava):
+            return end_game_screen()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
         player.update()
