@@ -422,6 +422,17 @@ def stop_menu():
                 start_screen()
 
 
+def draw_buttons_2(manager):
+    restart = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 400), (120, 50)),
+                                           text='Играть заново',
+                                           manager=manager)
+    menu = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((270, 400), (120, 50)),
+                                        text='В меню',
+                                        manager=manager)
+
+    return restart, menu
+
+
 def end_game_screen():
     global all_sprites, tiles_group, lava_group, player_group
     SCREEN = pygame.display.set_mode(SIZE_2)
@@ -472,8 +483,8 @@ def main_game():
     SCREEN.blit(clc, (430, 790))
     b = True
     fls = []
-    for i in range(9):
-        if i == 8:
+    for i in range(8):
+        if i == 7:
             field = Teleport(fls)
             fls = field.ret_fls()
         else:
