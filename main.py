@@ -1,7 +1,7 @@
 import os
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
@@ -54,30 +54,52 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__(player_group, all_sprites)
         self.image = load_image('player.png')
-        self.pos_x = FIRST_X + 100
-        self.pos_y = FIRST_Y - 41
+        self.pos_x = FIRST_X + 50
+        self.pos_y = FIRST_Y - 25 - 44
         self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
         self.jumping = False
         self.count = 0
         self.check_jump = 20
+        self.check_x = 1
         self.check_y = 0
         self.vx = 0
-        self.vy = 0
+        self.vy = 2
         self.jumpCount = 10
         self.isJump = False
+        self.check_distance = 0
 
     def jump(self):
-        if len(pygame.sprite.spritecollide(self, tiles_group, False)) == 1:
-            if self.isJump:
-                if self.jumpCount >= -10:
-                    neg = 0.5
-                    if self.jumpCount < 0:
-                        neg = -1
-                    self.rect.y -= self.jumpCount ** 2 * 0.4 * neg
-                    self.jumpCount -= 1
-                else:
-                    self.isJump = False
-                    self.jumpCount = 10
+        h = fls[0].rect.y - fls[self.check_distance + 1].rect.y + 43
+        self.rect.y -= h
+        self.check_distance += 1
+        # if self.isJump:
+        #     if self.jumpCount >= -10:
+        #         if self.jumpCount <= 0:
+        #             self.rect.y += (self.jumpCount ** 2) / 2
+        #         else:
+        #             self.rect.y -= (self.jumpCount ** 2) / 2
+        #         if self.jumpCount == -10:
+        #             self.rect.y -= 43
+        #         self.jumpCount -= 1
+        #     else:
+        #         self.isJump = False
+        #         self.jumpCount = 10
+
+    def update(self):
+        check = pygame.sprite.spritecollide(self, tiles_group, False)
+        if not len(check):
+            self.rect.y += self.vy ** 2
+        else:
+            self.vy = 2
+            if PLAYER_TURN is not True:
+                if check[-1].rect.x < 290 and check[-1].check_x == 1:
+                    self.rect.x += check[-1].vx
+                if check[-1].rect.x == 290 and check[-1].check_x == 1:
+                    self.check_x = -1
+                if check[-1].rect.x > 20 and check[-1].check_x == -1:
+                    self.rect.x -= check[0].vx
+                if check[-1].rect.x == 20 and check[-1].check_x == -1:
+                    self.check_x = 1
 
 
 class Field(pygame.sprite.Sprite):
@@ -374,9 +396,24 @@ def tile_movement_label():
     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
     SCREEN.blit(string_rendered, (0, 0))
 
+
 fls = []
 field = Field(fls)
 fls = field.ret_fls()
+
+
+def end_game_screen():
+    SCREEN = pygame.display.set_mode(SIZE_2)
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
+    SCREEN.blit(fon, (0, 0))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+        CLOCK.tick(FPS)
+        pygame.display.flip()
+
+
 def main_game():
     global PLAYER_TURN, IS_JUMPING, fls
     SCREEN = pygame.display.set_mode(SIZE_2)
@@ -384,28 +421,32 @@ def main_game():
     SCREEN.blit(fon, (0, 0))
     for i in range(9):
         field = Field(fls)
-        fls = field.ret_fls()
+        fls.append(field.ret_fls())
     print(fls)
     player = Player()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.KEYDOWN:  # добавляем передвижение по кнопкам и отправляем направление в функциюя класса
+            if event.type == pygame.KEYDOWN:  # добавляем передвижение по кнопкам и отправляем  направление в функциюя класса
                 if event.key == pygame.K_UP:
                     player.isJump = True
                 # if event.key == pygame.K_DOWN:
                 #     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:  # при нажатии на пробел меняем ход персонажа на движение плит и наоборот
-                    PLAYER_TURN = not PLAYER_TURN
-                    player.isJump = False
+                    player.jump()
+                    # PLAYER_TURN = not PLAYER_TURN
+                    # player.isJump = False
+        if player.rect.x not in range(0, 508) or player.rect.y > 900:
+            return end_game_screen()
         SCREEN.blit(fon, (0, 0))
         if PLAYER_TURN:  # если ход персонажа, то выводит этот текст на экран и обновляем только движения персонажа
             player_movement_label()
-            player.jump()
+
         else:
             tile_movement_label()
             tiles_group.update()
+        player.update()
         tiles_group.draw(SCREEN)
         player_group.draw(SCREEN)
         CLOCK.tick(FPS)
