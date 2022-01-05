@@ -47,12 +47,16 @@ def terminate():
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x, y):
         super(Player, self).__init__(player_group, all_sprites)
         self.image = load_image('player.png')
-        self.pos_x = 300
-        self.pos_y = 800
-        self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
+        print(x)
+        print(y)
+        self.pos_x = x + 25
+        self.pos_y = y - 73
+        self.rect = self.image.get_rect()
+        self.rect.x = self.pos_x
+        self.rect.y = self.pos_y
         self.vx = 0
         self.vy = 0
 
@@ -186,7 +190,7 @@ class Lava(pygame.sprite.Sprite):
         self.rect.x = 0
         self.rect.y = 1200
         self.check_x = 1
-        self.vx = 1
+        self.vx = 15
         self.image = Lava.image1
 
     def update(self, *args, **kwargs) -> None:
@@ -504,6 +508,7 @@ def end():
                 player_group = pygame.sprite.Group()
                 start_screen()
 
+
 def main_game():
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
@@ -515,7 +520,7 @@ def main_game():
     hat0 = load_image('hat0.png')
     SCREEN.blit(hat, (50, 50))
     SCREEN.blit(clc, (430, 790))
-    b = True
+    b = False
     fls = []
     for i in range(8):
         if i == 7:
@@ -525,7 +530,7 @@ def main_game():
             field = Field(fls)
             fls = field.ret_fls()
     print(fls)
-    player = Player()
+    player = Player(fls[0][0], fls[0][1])
     lava = Lava()
     while True:
         for event in pygame.event.get():
