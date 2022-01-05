@@ -1,7 +1,7 @@
 import os
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
@@ -18,6 +18,7 @@ pygame.display.set_caption('TimeLoop')
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
+lava_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
 CLOCK = pygame.time.Clock()
@@ -51,7 +52,7 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__(player_group, all_sprites)
         self.image = load_image('player.png')
         self.pos_x = 300
-        self.pos_y = 800
+        self.pos_y = 400
         self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
         self.vx = 0
         self.vy = 0
@@ -171,13 +172,13 @@ class Lava(pygame.sprite.Sprite):
     flag = True
 
     def __init__(self):
-        super().__init__(tiles_group)
+        super().__init__(lava_group)
         self.image = Lava.image
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 890
         self.check_x = 1
-        self.vx = 1
+        self.vx = 0.1
         self.image = Lava.image
 
     def update(self, *args, **kwargs) -> None:
@@ -226,6 +227,17 @@ def draw_buttons(manager):
                                                 manager=manager)
 
     return login, registration
+
+
+def draw_buttons_2(manager):
+    restart = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((130, 400), (100, 50)),
+                                           text='Играть заново',
+                                           manager=manager)
+    menu = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((280, 400), (100, 50)),
+                                        text='В меню',
+                                        manager=manager)
+
+    return restart, menu
 
 
 def show_records():
@@ -391,8 +403,42 @@ def support_screen():
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and 200 <= event.pos[0] <= 300 and 750 <= event.pos[1] <= 850:
                 start_screen()
+
         pygame.display.flip()
         CLOCK.tick(FPS)
+
+
+def end_game_screen():
+    global all_sprites, tiles_group, lava_group, player_group
+    SCREEN = pygame.display.set_mode(SIZE_2)
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
+    SCREEN.blit(fon, (0, 0))
+    text = f'Вы проиграли'
+    font = pygame.font.Font(None, 45)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (145, 300))
+    manager = pygame_gui.UIManager((507, 900))
+    time_delta = CLOCK.tick(60) / 1000.0
+    restart, menu = draw_buttons_2(manager)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == restart:
+                        all_sprites = pygame.sprite.Group()
+                        tiles_group = pygame.sprite.Group()
+                        lava_group = pygame.sprite.Group()
+                        player_group = pygame.sprite.Group()
+                        return main_game()
+                    elif event.ui_element == menu:
+                        return start_screen()
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(SCREEN)
+        CLOCK.tick(FPS)
+        pygame.display.flip()
 
 
 def main_game():
@@ -429,12 +475,16 @@ def main_game():
                     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:
                     player.change_direction(0, 0)
+        if pygame.sprite.collide_mask(player, lava):
+            return end_game_screen()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
         player.update()
         tiles_group.update()
+        lava_group.update()
         player_group.draw(SCREEN)
         tiles_group.draw(SCREEN)
+        lava_group.draw(SCREEN)
         CLOCK.tick(FPS)
         pygame.display.flip()
 
