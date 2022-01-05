@@ -433,6 +433,10 @@ def end_game_screen():
                         player_group = pygame.sprite.Group()
                         return main_game()
                     elif event.ui_element == menu:
+                        all_sprites = pygame.sprite.Group()
+                        tiles_group = pygame.sprite.Group()
+                        lava_group = pygame.sprite.Group()
+                        player_group = pygame.sprite.Group()
                         return start_screen()
             manager.process_events(event)
         manager.update(time_delta)
