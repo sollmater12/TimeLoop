@@ -1,7 +1,7 @@
 import os
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
@@ -9,27 +9,23 @@ import pygame_gui
 from database_connect import Connection
 from input_box import InputBox
 
-from pygame.locals import *
-import sys
-
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)  # меняем расположение окна
 FPS = 60
 SIZE = WIDTH, HEIGHT = 507, 900
 SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
 SCREEN = pygame.display.set_mode(SIZE)
-ACC = 0.5
-FRIC = -0.12
-pygame.display.set_caption('TimeLoop')
+pygame.display.set_caption('Авторизация')
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
-tele_group = pygame.sprite.Group()
 
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
-
-vec = pygame.math.Vector2
+PLAYER_TURN = True
+IS_JUMPING = False
+FIRST_X = 0
+FIRST_Y = 0
 
 
 def load_image(filename, colorkey=None):
@@ -55,59 +51,89 @@ def terminate():
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self):
         super(Player, self).__init__(player_group, all_sprites)
-        self.image = pygame.transform.scale(load_image('player.png'), (25, 43))
-        print(x)
-        print(y)
-        self.rect = self.image.get_rect()
-        self.pos = vec(x + 50, y)
-        self.vel = vec(0, 0)
-        self.acc = vec(0, 0.5)
-        print(self.pos[0])
-        print(self.pos[1])
-        self.rect.x = int(self.pos.x)
-        self.rect.y = int(self.pos.y)
-
-    def change_direction(self, x, y):
-        self.vx = x
-        self.vy = y
-
-    def move(self):
-        self.acc = vec(0, 0.1)
-        pressed_keys = pygame.key.get_pressed()
-
-        if pressed_keys[K_LEFT]:
-            self.acc.x = -ACC
-        if pressed_keys[K_RIGHT]:
-            self.acc.x = ACC
-
-        self.acc.x += self.vel.x * FRIC
-        self.vel += self.acc
-        self.pos += self.vel + 0.5 * self.acc
-
-        if self.pos.x > WIDTH:
-            self.pos.x = 0
-        if self.pos.x < 0:
-            self.pos.x = WIDTH
-        self.rect.midbottom = self.pos
-
-    def update(self, hits):
-        if hits:
-            self.pos.y = hits[0].rect.top + 1
-            self.vel.y = 0
-
-    def get_coord(self):
-        return [self.pos_x, self.pos_y]
+        self.image = load_image('player.png')
+        self.pos_x = FIRST_X + 50
+        self.pos_y = FIRST_Y - 25 - 44
+        self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
+        self.jumping = False
+        self.count = 0
+        self.check_x = 1
+        self.check_y = 0
+        self.vx = 0
+        self.vy = 2
+        self.vy_2 = 8
+        self.vy_3 = 1
+        self.isJump = False
+        self.check_jump = False
+        self.max_hight = 0
+        self.final_hight = 0
+        self.check_distance = 0
 
     def jump(self):
-        hits = pygame.sprite.spritecollide(self, tiles_group, False)
-        if hits:
-            self.vel.y = -3
+        global check
+        if self.check_distance != len(check):
+            if self.isJump:
+                if self.check_jump is not True:
+                    h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
+                    self.max_hight = check[self.check_distance][1] - h - 10
+                    if self.max_hight % 2 != 0:
+                        self.max_hight += 1
+                    self.final_hight = self.max_hight + 26
+                    self.check_jump = True
+                if self.rect.y > self.max_hight:
+                    self.rect.y -= self.vy_2
+                else:
+                    if self.rect.y > self.final_hight:
+                        self.rect.y += self.vy_3
+                        self.vy_3 += 2
+                    else:
+                        self.isJump = False
+                        self.check_jump = False
+                        self.vy_3 = 1
+                    # self.rect.y = self.final_hight
+                    # self.vy_2 = 8
+                    # self.isJump = False
+                    # self.check_jump = False
+        # if self.check_distance != len(check):
+        #     h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
+        #     self.final_hight = check[self.check_distance][1]
+        #     self.rect.y -= h
+        # if self.isJump:
+        #     if self.jumpCount >= -10:
+        #         if self.jumpCount <= 0:
+        #             self.rect.y += (self.jumpCount ** 2) / 2
+        #         else:
+        #             self.rect.y -= (self.jumpCount ** 2) / 2
+        #         if self.jumpCount == -10:
+        #             self.rect.y -= 43
+        #         self.jumpCount -= 1
+        #     else:
+        #         self.isJump = False
+        #         self.jumpCount = 10
+
+    def update(self):
+        check = pygame.sprite.spritecollide(self, tiles_group, False)
+        if not len(check):
+            self.rect.y += self.vy ** 2
+        else:
+            check_y = check[0].rect.y
+            self.check_distance = check_2[check_y]
+            self.vy = 2
+            if PLAYER_TURN is not True:
+                if check[-1].rect.x < 290 and check[-1].check_x == 1:
+                    self.rect.x += check[-1].vx
+                if check[-1].rect.x == 290 and check[-1].check_x == 1:
+                    self.check_x = -1
+                if check[-1].rect.x > 20 and check[-1].check_x == -1:
+                    self.rect.x -= check[0].vx
+                if check[-1].rect.x == 20 and check[-1].check_x == -1:
+                    self.check_x = 1
 
 
 class Field(pygame.sprite.Sprite):
-    image = pygame.transform.scale(load_image('check_draw.png'), (50, 13))
+    image = load_image("check_draw.png")
 
     def __init__(self, fls):
         super().__init__(tiles_group)
@@ -125,13 +151,13 @@ class Field(pygame.sprite.Sprite):
             if t == 1:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(20, 50)
-                self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+                self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = 1
             elif t == 2:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(250, 290)
-                self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+                self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = -1
         # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
@@ -146,7 +172,7 @@ class Field(pygame.sprite.Sprite):
                 b = random.randrange(41, 150)
                 self.check_x = 1
             self.rect.x = random.randrange(b - 40, b)
-            self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+            self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
             self.fls += [(self.rect.x, self.rect.y)]
         self.vx = 1
         self.image = Field.image
@@ -183,7 +209,7 @@ class Teleport(pygame.sprite.Sprite):
         self.fls = fls
         a = self.fls[-1]
         self.rect.x = random.randrange(20, 290)
-        self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+        self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
         self.fls += [(self.rect.x, self.rect.y)]
         direc = [-1, 1]
         self.check_x = random.choice(direc)
@@ -536,84 +562,69 @@ def end():
                 start_screen()
 
 
+def player_movement_label():
+    text = 'Ваш ход'
+    font = pygame.font.Font(None, 45)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (0, 0))
+
+
+def tile_movement_label():
+    text = 'Ход игры'
+    font = pygame.font.Font(None, 45)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (0, 0))
+
+
+fls = []
+check = []
+check_2 = {}
+field = Field(fls)
+fls = field.ret_fls()
+check.append(fls[-1])
+check_2[check[-1][-1]] = 0
+
+
+
 def main_game():
-    global all_sprites, tiles_group, lava_group, player_group
+    global PLAYER_TURN, IS_JUMPING, fls, check, check_2
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
-    hat = load_image('hat.png')
-    hat0 = load_image('hat0.png')
-    hat1 = load_image('hat1.png')
-    clc = pygame.transform.scale(load_image('clc.png'), (74, 109))
-    clc1 = pygame.transform.scale(load_image('clc1.png'), (74, 109))
-    hat0 = load_image('hat0.png')
-    SCREEN.blit(hat, (50, 50))
-    SCREEN.blit(clc, (430, 790))
-    b = True
-    fls = []
-    for i in range(12):
-        if i == 11:
-            field = Teleport(fls)
-            tele_group.add(field)
-            fls = field.ret_fls()
-        else:
-            field = Field(fls)
-            tiles_group.add(field)
-            fls = field.ret_fls()
+    SCREEN.blit(fon, (0, 0))
+    for i in range(6):
+        field = Field(fls)
+        fls = field.ret_fls()
+        check.append(field.ret_fls()[-1])
+        check_2[check[-1][-1]] = i + 1
     print(fls)
-    player = Player(fls[0][0], fls[0][1])
-    lava = Lava()
+    print(check)
+    print(check_2)
+    player = Player()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    player.change_direction(-1, 0)
-                if event.key == pygame.K_RIGHT:
-                    player.change_direction(1, 0)
+            if event.type == pygame.KEYDOWN:  # добавляем передвижение по кнопкам и отправляем  направление в функциюя класса
                 if event.key == pygame.K_UP:
-                    player.change_direction(0, -1)
-                if event.key == pygame.K_DOWN:
-                    player.change_direction(0, 1)
-                if event.key == pygame.K_SPACE:
-                    player.jump()
-            if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[1] <= 50:
-                SCREEN.blit(hat0, (0, 0))
-                SCREEN.blit(hat1, (0, 0))
-                pygame.display.flip()
-                time.sleep(0.25)
-                SCREEN.blit(hat0, (0, 0))
-                SCREEN.blit(hat, (0, 0))
-                stp = load_image('stp.png')
-                SCREEN.blit(stp, (0, 0))
-                pygame.display.flip()
-                stop_menu()
-            if event.type == pygame.MOUSEBUTTONDOWN and 359 <= event.pos[0] <= 507 and 683 <= event.pos[1] <= 900:
-                if b:
-                    b = False
-                else:
-                    b = True
-        if pygame.sprite.collide_mask(player, lava):
+                    if pygame.sprite.spritecollide(player, tiles_group, False):
+                        player.isJump = True
+                # if event.key == pygame.K_DOWN:
+                #     player.change_direction(0, 1)
+                if event.key == pygame.K_SPACE:  # при нажатии на пробел меняем ход персонажа на движение плит и наоборот
+                    PLAYER_TURN = not PLAYER_TURN
+                    player.isJump = False
+        if player.rect.x not in range(0, 508) or player.rect.y > 900:
             return end()
-        if pygame.sprite.spritecollide(player, tele_group, False):
-            all_sprites = pygame.sprite.Group()
-            tiles_group = pygame.sprite.Group()
-            lava_group = pygame.sprite.Group()
-            player_group = pygame.sprite.Group()
-            main_game()
         SCREEN.blit(fon, (0, 0))
-        SCREEN.blit(hat, (0, 0))
-        if b:
-            player.move()
-            player.update(pygame.sprite.spritecollide(player, tiles_group, False))
-            player_group.draw(SCREEN)
-            tiles_group.draw(SCREEN)
-            SCREEN.blit(clc, (430, 790))
+        if PLAYER_TURN:
+            player.jump() # если ход персонажа, то выводит этот текст на экран и обновляем только движения персонажа
+            player_movement_label()
         else:
+            tile_movement_label()
             tiles_group.update()
-            player_group.draw(SCREEN)
-            tiles_group.draw(SCREEN)
-            SCREEN.blit(clc1, (430, 790))
+        player.update()
+        tiles_group.draw(SCREEN)
+        player_group.draw(SCREEN)
         CLOCK.tick(FPS)
         pygame.display.flip()
 
