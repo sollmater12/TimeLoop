@@ -59,22 +59,47 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(self.pos_x, self.pos_y)
         self.jumping = False
         self.count = 0
-        self.check_jump = 20
         self.check_x = 1
         self.check_y = 0
         self.vx = 0
         self.vy = 2
-        self.jumpCount = 10
+        self.vy_2 = 8
+        self.vy_3 = 1
         self.isJump = False
+        self.check_jump = False
+        self.max_hight = 0
+        self.final_hight = 0
         self.check_distance = 0
 
     def jump(self):
+        global check
         if self.check_distance != len(check):
-            h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
             if self.isJump:
-                pass
-            self.rect.y -= h
-            self.check_distance += 1
+                if self.check_jump is not True:
+                    h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
+                    self.max_hight = check[self.check_distance][1] - h - 10
+                    if self.max_hight % 2 != 0:
+                        self.max_hight += 1
+                    self.final_hight = self.max_hight + 26
+                    self.check_jump = True
+                if self.rect.y > self.max_hight:
+                    self.rect.y -= self.vy_2
+                else:
+                    if self.rect.y > self.final_hight:
+                        self.rect.y += self.vy_3
+                        self.vy_3 += 2
+                    else:
+                        self.isJump = False
+                        self.check_jump = False
+                        self.vy_3 = 1
+                    # self.rect.y = self.final_hight
+                    # self.vy_2 = 8
+                    # self.isJump = False
+                    # self.check_jump = False
+        # if self.check_distance != len(check):
+        #     h = check[self.check_distance][1] - check[self.check_distance + 1][1] + 43
+        #     self.final_hight = check[self.check_distance][1]
+        #     self.rect.y -= h
         # if self.isJump:
         #     if self.jumpCount >= -10:
         #         if self.jumpCount <= 0:
@@ -443,18 +468,18 @@ def main_game():
                 terminate()
             if event.type == pygame.KEYDOWN:  # добавляем передвижение по кнопкам и отправляем  направление в функциюя класса
                 if event.key == pygame.K_UP:
-                    player.jump()
-                    player.isJump = True
+                    if pygame.sprite.spritecollide(player, tiles_group, False):
+                        player.isJump = True
                 # if event.key == pygame.K_DOWN:
                 #     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:  # при нажатии на пробел меняем ход персонажа на движение плит и наоборот
-
                     PLAYER_TURN = not PLAYER_TURN
                     player.isJump = False
         if player.rect.x not in range(0, 508) or player.rect.y > 900:
             return end_game_screen()
         SCREEN.blit(fon, (0, 0))
-        if PLAYER_TURN:  # если ход персонажа, то выводит этот текст на экран и обновляем только движения персонажа
+        if PLAYER_TURN:
+            player.jump() # если ход персонажа, то выводит этот текст на экран и обновляем только движения персонажа
             player_movement_label()
         else:
             tile_movement_label()
