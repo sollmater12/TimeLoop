@@ -169,16 +169,17 @@ class Lava(pygame.sprite.Sprite):
     image = load_image("lava.png")
     image1 = load_image("lava1.png")
     flag = True
+    count = 0
 
     def __init__(self):
         super().__init__(tiles_group)
-        self.image = Lava.image
+        self.image = Lava.image1
         self.rect = self.image.get_rect()
         self.rect.x = 0
-        self.rect.y = 890
+        self.rect.y = 1200
         self.check_x = 1
         self.vx = 1
-        self.image = Lava.image
+        self.image = Lava.image1
 
     def update(self, *args, **kwargs) -> None:
         self.rect.y -= self.vx
@@ -395,14 +396,37 @@ def support_screen():
         CLOCK.tick(FPS)
 
 
+def stop_menu():
+    a = True
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
+    while a:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN and 120 <= event.pos[0] <= 180 and 400 <= event.pos[1] <= 465:
+                a = False
+            if event.type == pygame.MOUSEBUTTONDOWN and 205 <= event.pos[0] <= 275 and 400 <= event.pos[1] <= 465:
+                a = False
+                SCREEN.blit(fon, (0, 0))
+                main_game()
+            if event.type == pygame.MOUSEBUTTONDOWN and 290 <= event.pos[0] <= 370 and 400 <= event.pos[1] <= 465:
+                a = False
+                SCREEN.blit(fon, (0, 0))
+                start_screen()
+
+
 def main_game():
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     hat = load_image('hat.png')
     hat0 = load_image('hat0.png')
     hat1 = load_image('hat1.png')
+    clc = pygame.transform.scale(load_image('clc.png'), (74, 109))
+    clc1 = pygame.transform.scale(load_image('clc1.png'), (74, 109))
     SCREEN.blit(fon, (0, 0))
     SCREEN.blit(hat, (50, 50))
+    SCREEN.blit(clc, (430, 790))
+    b = True
     fls = []
     for i in range(9):
         if i == 8:
@@ -429,12 +453,32 @@ def main_game():
                     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:
                     player.change_direction(0, 0)
+            if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[1] <= 50:
+                SCREEN.blit(hat0, (0, 0))
+                SCREEN.blit(hat1, (0, 0))
+                pygame.display.flip()
+                time.sleep(0.25)
+                SCREEN.blit(hat0, (0, 0))
+                SCREEN.blit(hat, (0, 0))
+                stp = load_image('stp.png')
+                SCREEN.blit(stp, (0, 0))
+                pygame.display.flip()
+                stop_menu()
+            if event.type == pygame.MOUSEBUTTONDOWN and 359 <= event.pos[0] <= 507 and 683 <= event.pos[1] <= 900:
+                if b:
+                    b = False
+                else:
+                    b = True
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
         player.update()
         tiles_group.update()
         player_group.draw(SCREEN)
         tiles_group.draw(SCREEN)
+        if b:
+            SCREEN.blit(clc, (430, 790))
+        else:
+            SCREEN.blit(clc1, (430, 790))
         CLOCK.tick(FPS)
         pygame.display.flip()
 
