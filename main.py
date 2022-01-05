@@ -86,13 +86,13 @@ class Field(pygame.sprite.Sprite):
             if t == 1:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(20, 50)
-                self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+                self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = 1
             elif t == 2:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(250, 290)
-                self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+                self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = -1
         # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
@@ -107,7 +107,7 @@ class Field(pygame.sprite.Sprite):
                 b = random.randrange(41, 150)
                 self.check_x = 1
             self.rect.x = random.randrange(b - 40, b)
-            self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+            self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
             self.fls += [(self.rect.x, self.rect.y)]
         self.vx = 1
         self.image = Field.image
@@ -144,7 +144,7 @@ class Teleport(pygame.sprite.Sprite):
         self.fls = fls
         a = self.fls[-1]
         self.rect.x = random.randrange(20, 290)
-        self.rect.y = random.randrange(a[1] - 100, a[1] - 80)
+        self.rect.y = random.randrange(a[1] - 120, a[1] - 100)
         self.fls += [(self.rect.x, self.rect.y)]
         direc = [-1, 1]
         self.check_x = random.choice(direc)
@@ -397,6 +397,7 @@ def support_screen():
 
 
 def stop_menu():
+    global all_sprites, tiles_group, lava_group, player_group
     a = True
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     while a:
@@ -407,11 +408,17 @@ def stop_menu():
                 a = False
             if event.type == pygame.MOUSEBUTTONDOWN and 205 <= event.pos[0] <= 275 and 400 <= event.pos[1] <= 465:
                 a = False
-                SCREEN.blit(fon, (0, 0))
+                all_sprites = pygame.sprite.Group()
+                tiles_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                player_group = pygame.sprite.Group()
                 main_game()
             if event.type == pygame.MOUSEBUTTONDOWN and 290 <= event.pos[0] <= 370 and 400 <= event.pos[1] <= 465:
                 a = False
-                SCREEN.blit(fon, (0, 0))
+                all_sprites = pygame.sprite.Group()
+                tiles_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                player_group = pygame.sprite.Group()
                 start_screen()
 
 
@@ -469,6 +476,7 @@ def main_game():
                     b = False
                 else:
                     b = True
+
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
         player.update()
