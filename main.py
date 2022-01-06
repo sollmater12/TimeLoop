@@ -25,6 +25,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 tele_group = pygame.sprite.Group()
+lava_group = pygame.sprite.Group()
 kill_group = pygame.sprite.Group()
 good_blocks = pygame.sprite.Group()
 fon = pygame.sprite.Group()
@@ -32,6 +33,8 @@ coin = pygame.sprite.Group()
 
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
+
+FIRST_X, FIRST_Y = 0, 0
 
 vec = pygame.math.Vector2
 
@@ -65,19 +68,20 @@ class Player(pygame.sprite.Sprite):
         print(x)
         print(y)
         self.rect = self.image.get_rect()
-        self.pos = vec(x + 50, y)
+        self.pos = vec(FIRST_X + 15, FIRST_Y - 40)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0.5)
         print(self.pos[0])
         print(self.pos[1])
         self.rect.x = int(self.pos.x)
         self.rect.y = int(self.pos.y)
+        self.isJump = False
 
     def change_direction(self, x, y):
         self.vx = x
         self.vy = y
 
-    def move(self):
+    def move(self, check):
         self.acc = vec(0, 0.1)
         # pressed_keys = pygame.key.get_pressed()
         #
@@ -94,12 +98,23 @@ class Player(pygame.sprite.Sprite):
         #     self.pos.x = 0
         # if self.pos.x < 0:
         #     self.pos.x = WIDTH
+        # if not check or self.isJump is True:
         self.rect.midbottom = self.pos
-
-    def update(self, hits):
-        if hits:
-            self.pos.y = hits[0].rect.top + 1
+        self.isJump = False
+        if self.vel.y > 0 and check:
+            self.pos.y = check[0].rect.top + 1
             self.vel.y = 0
+
+    def update(self, check):
+        if check:
+            if check[-1].rect.x < 290 and check[-1].check_x == 1:
+                self.pos.x += check[-1].vx
+            if check[-1].rect.x == 290 and check[-1].check_x == 1:
+                self.check_x = -1
+            if check[-1].rect.x > 20 and check[-1].check_x == -1:
+                self.pos.x -= check[0].vx
+            if check[-1].rect.x == 20 and check[-1].check_x == -1:
+                self.check_x = 1
 
     def get_coord(self):
         return [self.pos.x, self.pos.y]
@@ -107,13 +122,14 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         hits = pygame.sprite.spritecollide(self, tiles_group, False)
         if hits:
-            self.vel.y = -3
+            self.vel.y = -4
 
 
 class Field(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('check_draw.png'), (50, 13))
 
     def __init__(self, fls):
+        global FIRST_X, FIRST_Y
         super().__init__(tiles_group, good_blocks, all_sprites)
         self.image = Field.image
         self.rect = self.image.get_rect()
@@ -123,6 +139,8 @@ class Field(pygame.sprite.Sprite):
             self.rect.y = random.randrange(860, 880)
             self.fls += [(self.rect.x, self.rect.y)]
             self.check_x = -1
+            FIRST_X = self.rect.x
+            FIRST_Y = self.rect.y
         elif len(self.fls) == 1:
             t = random.randrange(1, 3)
             print(t)
@@ -242,7 +260,7 @@ class Lava(pygame.sprite.Sprite):
     count = 0
 
     def __init__(self):
-        super().__init__(all_sprites)
+        super().__init__(lava_group)
         self.image = Lava.image1
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -561,7 +579,7 @@ def draw_buttons_2(manager):
 
 
 def end():
-    global all_sprites, tiles_group, player_group
+    global all_sprites, tiles_group, player_group, kill_group, tele_group
     die = load_image('die.png')
     SCREEN.blit(die, (0, 0))
     pygame.display.flip()
@@ -635,6 +653,7 @@ def main_game():
                 # if event.key == pygame.K_DOWN:
                 #     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:
+                    player.isJump = True
                     player.jump()
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
             if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[1] <= 50:
@@ -656,14 +675,7 @@ def main_game():
                 else:
                     b = True
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
-        if pygame.sprite.collide_mask(player, lava):
-            return end()
-        if player.get_coord()[1] > 943:
-            return end()
-        if pygame.sprite.spritecollide(player, kill_group, False):
-            return end()
-        if pygame.sprite.spritecollide(player, coin, True):
-            count += 1
+
         if pygame.sprite.spritecollide(player, tele_group, False):
             all_sprites = pygame.sprite.Group()
             tiles_group = pygame.sprite.Group()
@@ -671,17 +683,25 @@ def main_game():
             main_game()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
+        player.move(pygame.sprite.spritecollide(player, tiles_group, False))
         if b:
-            player.move()
-            player.update(pygame.sprite.spritecollide(player, tiles_group, False))
             all_sprites.draw(SCREEN)
             SCREEN.blit(clc, (430, 790))
         else:
+            player.update(pygame.sprite.spritecollide(player, tiles_group, False))
             good_blocks.update()
             kill_group.update()
             lava.update()
             all_sprites.draw(SCREEN)
             SCREEN.blit(clc1, (430, 790))
+        # if pygame.sprite.spritecollide(player, lava_group, False):
+        #     return end()
+        if player.get_coord()[1] > 1000:
+            return end()
+        if pygame.sprite.spritecollide(player, kill_group, False):
+            return end()
+        if pygame.sprite.spritecollide(player, coin, True):
+            count += 1
         # res(count1)
         CLOCK.tick(FPS)
         pygame.display.flip()
