@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
         print(x)
         print(y)
         self.rect = self.image.get_rect()
-        self.pos = vec(x + 50, y)
+        self.pos = vec(x + 25, y)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0.5)
         print(self.pos[0])
@@ -107,7 +107,7 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         hits = pygame.sprite.spritecollide(self, tiles_group, False)
         if hits:
-            self.vel.y = -3
+            self.vel.y = -4
 
 
 class Field(pygame.sprite.Sprite):
@@ -217,7 +217,8 @@ class Killer(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 5
         self.rect.y = random.randrange(60, 880)
-        while pygame.sprite.spritecollide(self, good_blocks, False):
+        while pygame.sprite.spritecollide(self, good_blocks, False) or pygame.sprite.spritecollide(self, player_group,
+                                                                                                   False):
             self.rect.y = random.randrange(60, 880)
         direc = [-1, 1]
         self.check_x = random.choice(direc)
@@ -465,7 +466,10 @@ def support_screen():
                   'А все окружающее замерло. Но вот незадача - ',
                   'Вы умеете только прыгать вертикально вверх, ',
                   'Движения вбок недоступны. Чем выше вам ',
-                  'Удастся забраться, тем круче. Удачи!']
+                  'Удастся забраться, тем круче. Удачи!',
+                  "Для прыжка жмите на пробел,",
+                  "Для смены времени - на Д (L).",
+                  "Собирайте монеты и бейте рекорды!"]
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
@@ -475,12 +479,12 @@ def support_screen():
         text_coord += intro_rect.height
         SCREEN.blit(string_rendered, intro_rect)
         ret = pygame.transform.scale(load_image('return.png'), (100, 100))
-        SCREEN.blit(ret, (200, 750))
+        SCREEN.blit(ret, (200, 800))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN and 200 <= event.pos[0] <= 300 and 750 <= event.pos[1] <= 850:
+            if event.type == pygame.MOUSEBUTTONDOWN and 200 <= event.pos[0] <= 300 and 800 <= event.pos[1] <= 900:
                 start_screen()
         pygame.display.flip()
         CLOCK.tick(FPS)
@@ -648,7 +652,7 @@ def main_game():
                 SCREEN.blit(stp, (0, 0))
                 pygame.display.flip()
                 stop_menu()
-            if (event.type == pygame.MOUSEBUTTONDOWN and 359 <= event.pos[0] <= 507 and 683 <= event.pos[1] <= 900)\
+            if (event.type == pygame.MOUSEBUTTONDOWN and 359 <= event.pos[0] <= 507 and 683 <= event.pos[1] <= 900) \
                     or (event.type == pygame.KEYDOWN and event.key == pygame.K_l):
                 if b:
                     b = False
