@@ -1,16 +1,13 @@
 import os  # ЗДРАВСТВУЙТЕ, КСЕНИЯ АНДРЕЕВНА!
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
 
 from database_connect import Connection
 from input_box import InputBox
-
-from pygame.locals import *
-import sys
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)  # Задаем константы
 FPS = 60
@@ -33,6 +30,7 @@ coin = pygame.sprite.Group()
 
 CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
+PLAYER_TURN = False
 
 FIRST_X, FIRST_Y = 0, 0
 
@@ -198,6 +196,7 @@ class Field(pygame.sprite.Sprite):
     def ret_fls(self):
         return self.fls
 
+
 # Класс плиты, которая перемещает на следующий уровень
 class Teleport(pygame.sprite.Sprite):
     image = load_image("tile1.png")
@@ -229,6 +228,7 @@ class Teleport(pygame.sprite.Sprite):
     def ret_fls(self):
         return self.fls
 
+
 # Класс плиты-убийцы. Ее касаться нельзя
 class Killer(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('tile_kill2.png'), (150, 26))
@@ -257,6 +257,7 @@ class Killer(pygame.sprite.Sprite):
         if self.rect.x == 5 and self.check_x == -1:
             self.check_x = 1
 
+
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
 class Lava(pygame.sprite.Sprite):
     image = load_image("lava1.png")
@@ -278,6 +279,7 @@ class Lava(pygame.sprite.Sprite):
         self.rect.y -= self.vx / FPS
         CLOCK.tick(FPS)
 
+
 # Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделан
 class Coin(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('cn.png'), (50, 50))
@@ -289,6 +291,7 @@ class Coin(pygame.sprite.Sprite):
         self.rect.x = random.randrange(5, 450)
         self.rect.y = random.randrange(100, 850)
         self.image = Coin.image
+
 
 # Функция отрисовки текста на регистрационном окне
 def show_start_text():
@@ -309,6 +312,7 @@ def show_start_text():
     string_rendered = font.render(password_field, 1, pygame.Color(0, 0, 0))
     SCREEN.blit(string_rendered, (40, 315))
 
+
 # Сейчас не используется, когда будем наводить лоск в проекте - уберем
 def succesfull_text():
     text = 'Вы успешно вошли / зарегистрировались'
@@ -316,12 +320,14 @@ def succesfull_text():
     string_rendered = font.render(text, 1, pygame.Color(135, 144, 166))
     SCREEN.blit(string_rendered, (80, 600))
 
+
 # Отрисовка текста, если произошла какая-то ошибка с именем или паролем
 def failed_text():
     text = 'Имя уже занято / Имени не существует'
     font = pygame.font.Font(None, 30)
     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
     SCREEN.blit(string_rendered, (60, 600))
+
 
 # Рисуем кнопочки на рег окне
 def draw_buttons(manager):
@@ -333,6 +339,7 @@ def draw_buttons(manager):
                                                 manager=manager)
 
     return login, registration
+
 
 # Функция показа рекорда из БД в главном меню. Пока рекорд не обновляется, доделаем
 def show_records():
@@ -356,6 +363,7 @@ def show_start_label():
     SCREEN.blit(start_label, (200, 300))
     start_label = pygame.transform.scale(load_image('rls.png'), (100, 100))
     SCREEN.blit(start_label, (200, 450))
+
 
 # Отрабатываем ввод текста в рег окне
 def registration_screen():
@@ -402,6 +410,7 @@ def registration_screen():
 
         CLOCK.tick(60)
 
+
 # Механика работы кнопок в главном меню плюс микро-пасхалочка
 def start_screen():
     SCREEN = pygame.display.set_mode(SIZE)
@@ -442,22 +451,23 @@ def start_screen():
                 pygame.display.flip()
                 time.sleep(0.5)
                 return support_screen()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                for i in range(13):
-                    b = i + 5
-                    a = load_image(str(b) + '.png')
-                    SCREEN.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
-                    pygame.display.flip()
-                    time.sleep(0.0001)
-                    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-                    start_label_1 = pygame.transform.scale(load_image('strt.png'), (100, 100))
-                    rules_label = pygame.transform.scale(load_image('rls.png'), (100, 100))
-                    SCREEN.blit(fon, (0, 0))
-                    SCREEN.blit(start_label_1, (200, 300))
-                    SCREEN.blit(rules_label, (200, 450))
-                    show_records()
-                    pygame.display.flip()
+            # elif event.type == pygame.MOUSEBUTTONDOWN:
+            #     for i in range(13):
+            #         b = i + 5
+            #         a = load_image(str(b) + '.png')
+            #         SCREEN.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
+            #         pygame.display.flip()
+            #         time.sleep(0.0001)
+            #         fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+            #         start_label_1 = pygame.transform.scale(load_image('strt.png'), (100, 100))
+            #         rules_label = pygame.transform.scale(load_image('rls.png'), (100, 100))
+            #         SCREEN.blit(fon, (0, 0))
+            #         SCREEN.blit(start_label_1, (200, 300))
+            #         SCREEN.blit(rules_label, (200, 450))
+            #         show_records()
+            #         pygame.display.flip()
         pygame.display.flip()
+
 
 # Рисуем экран с правилами
 def support_screen():
@@ -511,6 +521,7 @@ def support_screen():
         pygame.display.flip()
         CLOCK.tick(FPS)
 
+
 # Меню паузы
 def stop_menu():
     global all_sprites, tiles_group, lava_group, player_group
@@ -536,17 +547,6 @@ def stop_menu():
                 lava_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
                 start_screen()
-
-# Опять ненужная штука, уберем
-def draw_buttons_2(manager):
-    restart = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 400), (120, 50)),
-                                           text='Играть заново',
-                                           manager=manager)
-    menu = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((270, 400), (120, 50)),
-                                        text='В меню',
-                                        manager=manager)
-
-    return restart, menu
 
 
 # def end_game_screen():
@@ -591,19 +591,19 @@ def end():
     die = load_image('die.png')
     SCREEN.blit(die, (0, 0))
     pygame.display.flip()
-    a = True
-    while a:
+    running = True
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and 115 <= event.pos[0] <= 195 and 380 <= event.pos[1] <= 450:
-                a = False
+                running = False
                 all_sprites = pygame.sprite.Group()
                 tiles_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
                 main_game()
             if event.type == pygame.MOUSEBUTTONDOWN and 255 <= event.pos[0] <= 340 and 370 <= event.pos[1] <= 450:
-                a = False
+                running = False
                 all_sprites = pygame.sprite.Group()
                 tiles_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
@@ -613,9 +613,10 @@ def end():
 count = 0  # Счетчик монет
 count1 = 0  # Счетчик расстояния будет
 
+
 # Функция работы основной игры
 def main_game():
-    global all_sprites, tiles_group, player_group, count, coin, kill_group, tele_group, count1
+    global PLAYER_TURN, all_sprites, tiles_group, player_group, count, coin, kill_group, tele_group, count1
     SCREEN = pygame.display.set_mode(SIZE_2)
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     hat = load_image('hat.png')
@@ -653,19 +654,13 @@ def main_game():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.KEYDOWN:
-                # if event.key == pygame.K_LEFT:
-                #     player.change_direction(-1, 0)
-                # if event.key == pygame.K_RIGHT:
-                #     player.change_direction(1, 0)
-                # if event.key == pygame.K_UP:
-                #     player.change_direction(0, -1)
-                # if event.key == pygame.K_DOWN:
-                #     player.change_direction(0, 1)
                 if event.key == pygame.K_SPACE:  # Прыжок перса
-                    player.isJump = True
-                    player.jump()
+                    if PLAYER_TURN:
+                        player.isJump = True
+                        player.jump()
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
-            if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[1] <= 50:  # Ставимся на паузу
+            if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[
+                1] <= 50:  # Ставимся на паузу
                 SCREEN.blit(hat0, (0, 0))
                 SCREEN.blit(hat1, (0, 0))
                 pygame.display.flip()
@@ -677,12 +672,13 @@ def main_game():
                 pygame.display.flip()
                 stop_menu()
             if (event.type == pygame.MOUSEBUTTONDOWN and 359 <= event.pos[0] <= 507 and 683 <= event.pos[1] <= 900) \
-                    or (event.type == pygame.KEYDOWN and event.key == pygame.K_l):  # Смена хода как бы, то есть заморожены плиты или нет
-                if b:
-                    b = False
+                    or (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_l):  # Смена хода как бы, то есть заморожены плиты или нет
+                if PLAYER_TURN:
+                    PLAYER_TURN = False
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
                 else:
-                    b = True
+                    PLAYER_TURN = True
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
 
         if pygame.sprite.spritecollide(player, tele_group, False):  # Переход на новый уровень
@@ -693,7 +689,7 @@ def main_game():
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
         player.move(pygame.sprite.spritecollide(player, tiles_group, False))
-        if b:  # Если заморожены или наоборот происходит разное
+        if PLAYER_TURN:  # Если заморожены или наоборот происходит разное
             all_sprites.draw(SCREEN)
             SCREEN.blit(fon1, (0, 0))
             SCREEN.blit(hat, (0, 0))
