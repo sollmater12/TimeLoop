@@ -172,7 +172,7 @@ class Field(pygame.sprite.Sprite):
             self.rect.x = random.randrange(b - 40, b)
             self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
             self.fls += [(self.rect.x, self.rect.y)]
-        self.vx = 180  # Этот параметр отвечает за скорость. Если его менять, то плиты останавливаются в конце экрана
+        self.vx = 60  # Этот параметр отвечает за скорость. Если его менять, то плиты останавливаются в конце экрана
         self.image = Field.image
 
     def update(self, *args, **kwargs) -> None:
@@ -237,26 +237,18 @@ class Killer(pygame.sprite.Sprite):
         super().__init__(kill_group, all_sprites)
         self.image = Killer.image
         self.rect = self.image.get_rect()
-        self.rect.x = 5
+        place = [-180, 515]
+        self.rect.x = random.choice(place)
         self.rect.y = random.randrange(60, 880)
-        while pygame.sprite.spritecollide(self, good_blocks, False) or pygame.sprite.spritecollide(self, player_group,
-                                                                                                   False):
-            self.rect.y = random.randrange(60, 880)
-        direc = [-1, 1]
-        self.check_x = random.choice(direc)
+        if self.rect.x == -180:
+            self.check_x = 1
+        else:
+            self.check_x = -1
         self.vx = 1
         self.image = Killer.image
 
     def update(self, *args, **kwargs) -> None:
-        if self.rect.x < 350 and self.check_x == 1:
-            self.rect.x += self.vx
-        if self.rect.x == 350 and self.check_x == 1:
-            self.check_x = -1
-        if self.rect.x > 5 and self.check_x == -1:
-            self.rect.x -= self.vx
-        if self.rect.x == 5 and self.check_x == -1:
-            self.check_x = 1
-
+        self.rect.x += self.vx
 
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
 class Lava(pygame.sprite.Sprite):
@@ -270,16 +262,16 @@ class Lava(pygame.sprite.Sprite):
         self.image = Lava.image1
         self.rect = self.image.get_rect()
         self.rect.x = 0
-        self.rect.y = 1200
+        self.rect.y = 2300
         self.check_x = 1
-        self.vx = 15
+        self.vx = 0.1
         self.image = Lava.image1
 
     def update(self, *args, **kwargs) -> None:
         self.rect.y -= self.vx / FPS
 
 
-# Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделан
+# Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделаны
 class Coin(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('cn.png'), (50, 50))
 
@@ -641,8 +633,15 @@ def main_game():
             good_blocks.add(field)
             fls = field.ret_fls()
     print(fls)  # Дебаг :)
-    for i in range(random.randrange(1, 4)):  # Генерация плит-убийц
-        kill = Killer()
+    h = random.randrange(2, 10)
+    g = ['250', '1000', '2000', '1500', '750', '1750', '1250', '3000', '2500']
+    i1 = []
+    for i in range(h):
+        j = random.choice(g)
+        i1 += [j]
+        g.remove(j)
+    c1 = 0
+    print(i1)
     player = Player(fls[0][0], fls[0][1])
     # coord = player.get_coord()[1]
     cn = Coin()
@@ -688,7 +687,7 @@ def main_game():
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
         player.move(pygame.sprite.spritecollide(player, tiles_group, False))
-        if PLAYER_TURN:  # Если заморожены или наоборот происходит разное
+        if PLAYER_TURN:
             all_sprites.draw(SCREEN)
             SCREEN.blit(fon1, (0, 0))
             SCREEN.blit(hat, (0, 0))
@@ -700,8 +699,15 @@ def main_game():
             lava.update()
             all_sprites.draw(SCREEN)
             SCREEN.blit(clc1, (430, 790))
-        # if pygame.sprite.spritecollide(player, lava_group, False):  <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
-        #     return end()
+        if pygame.sprite.spritecollide(player, lava_group, False):  # <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
+            all_sprites.empty()
+            tiles_group.empty()
+            player_group.empty()
+            tele_group.empty()
+            lava_group.empty()
+            kill_group.empty()
+            good_blocks.empty()
+            return end()
         if player.get_coord()[1] > 950: # Смерть при падении
             all_sprites.empty()
             tiles_group.empty()
@@ -722,6 +728,9 @@ def main_game():
             return end()
         if pygame.sprite.spritecollide(player, coin, True):  # Считаем коины
             count += 1
+        if str(c1) in i1:
+            kill = Killer()
+        c1 += 1
         # res(count1)
         CLOCK.tick(FPS)
         pygame.display.flip()
