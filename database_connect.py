@@ -55,3 +55,11 @@ class Connection():
         request = """SELECT record FROM records WHERE id = ?"""
         result = self.cursor.execute(request, (self.id,)).fetchall()
         return result[0][0]
+
+    def check_record(self, record):
+        request = """SELECT record FROM records WHERE id = ?"""
+        result = self.cursor.execute(request, (self.id,)).fetchone()
+        if record > int(result[0]):
+            request = """UPDATE records SET record = ? WHERE id = ?"""
+            self.cursor.execute(request, (record, self.id))
+            self.connection.commit()
