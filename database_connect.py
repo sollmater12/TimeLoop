@@ -41,7 +41,8 @@ class Connection():
     id     TEXT PRIMARY KEY
                 UNIQUE
                 NOT NULL,
-    record INT  NOT NULL
+    record INT  NOT NULL,
+    moneys INT  NOT NULL,
 );
 """
         self.cursor.execute(req)
@@ -55,6 +56,20 @@ class Connection():
         request = """SELECT record FROM records WHERE id = ?"""
         result = self.cursor.execute(request, (self.id,)).fetchall()
         return result[0][0]
+
+    def show_money(self):
+        request = """SELECT moneys FROM records WHERE id = ?"""
+        result = self.cursor.execute(request, (self.id,)).fetchall()
+        return result[0][0]
+
+    def add_money(self, money):
+        request = """SELECT moneys FROM records WHERE id = ?"""
+        result = self.cursor.execute(request, (self.id,)).fetchone()
+        check_money = money + int(result[0])
+        request = """UPDATE records SET moneys = ? WHERE id = ?"""
+        self.cursor.execute(request, (check_money, self.id))
+        self.connection.commit()
+
 
     def check_record(self, record):
         request = """SELECT record FROM records WHERE id = ?"""

@@ -141,7 +141,7 @@ class Field(pygame.sprite.Sprite):
         self.fls = fls
         if len(self.fls) == 0:
             self.rect.x = random.randrange(20, 290)
-            self.rect.y = random.randrange(860, 880)
+            self.rect.y = random.randrange(880, 890)
             self.fls += [(self.rect.x, self.rect.y)]
             self.check_x = -1
             FIRST_X = self.rect.x
@@ -240,8 +240,8 @@ class Killer(pygame.sprite.Sprite):
         super().__init__(kill_group, all_sprites)
         self.image = Killer.image
         self.rect = self.image.get_rect()
-        self.rect.x = -80
-        self.rect.y = random.randrange(60, 880)
+        self.rect.x = -249
+        self.rect.y = random.randrange(60, 700)
         while pygame.sprite.spritecollide(self, good_blocks, False) or pygame.sprite.spritecollide(self, player_group,
                                                                                                    False):
             self.rect.y = random.randrange(60, 880)
@@ -253,7 +253,7 @@ class Killer(pygame.sprite.Sprite):
     def update(self, *args, **kwargs) -> None:
         self.rect.x += self.vx / FPS
         if self.rect.x > 507:
-            self.rect.x = -80
+            self.rect.x = -249
         # if self.rect.x < 350 and self.check_x == 1:
         #     self.rect.x += self.vx
         # if self.rect.x == 350 and self.check_x == 1:
@@ -349,9 +349,13 @@ def draw_buttons(manager):
 # Функция показа рекорда из БД в главном меню. Пока рекорд не обновляется, доделаем
 def show_records():
     text = f'Мой рекорд: {CONNECTION.show_records()}'
+    text_2 = f'Количество монет: {CONNECTION.show_money()}'
     font = pygame.font.Font(None, 30)
     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    string_rendered_2 = font.render(text_2, 1, pygame.Color(0, 0, 0))
     SCREEN.blit(string_rendered, (180, 200))
+    SCREEN.blit(string_rendered_2, (160, 225))
+
 
 
 # def res(step):
@@ -716,14 +720,21 @@ def main_game():
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
 
         if pygame.sprite.spritecollide(player, tele_group, False):  # Переход на новый уровень
-            count1 = help_count_len
+            count2 = help_count_len
+            all_sprites.empty()
+            tiles_group.empty()
+            player_group.empty()
+            tele_group.empty()
+            lava_group.empty()
+            kill_group.empty()
+            good_blocks.empty()
             all_sprites = pygame.sprite.Group()
             tiles_group = pygame.sprite.Group()
             player_group = pygame.sprite.Group()
             main_game()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
-        help_count_len = (START_HEIGHT - player.rect.y) // 60 + count1
+        help_count_len = (START_HEIGHT - player.rect.y) // 60 + count2
         show_current_records(help_count_len)
         show_coins(count2)
         player.move(pygame.sprite.spritecollide(player, tiles_group, False))
@@ -752,6 +763,7 @@ def main_game():
             lava_group.empty()
             kill_group.empty()
             good_blocks.empty()
+            CONNECTION.add_money(count2)
             CONNECTION.check_record(help_count_len)
             return end()
         if pygame.sprite.spritecollide(player, kill_group, False):  # Смерть от плит-убийц
@@ -763,6 +775,7 @@ def main_game():
             lava_group.empty()
             kill_group.empty()
             good_blocks.empty()
+            CONNECTION.add_money(count2)
             CONNECTION.check_record(help_count_len)
             return end()
         if pygame.sprite.spritecollide(player, coin, True):  # Считаем коины
