@@ -720,7 +720,7 @@ def main_game():
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
 
         if pygame.sprite.spritecollide(player, tele_group, False):  # Переход на новый уровень
-            count2 = help_count_len
+            count1 = help_count_len
             all_sprites.empty()
             tiles_group.empty()
             player_group.empty()
@@ -734,12 +734,11 @@ def main_game():
             main_game()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
-        help_count_len = (START_HEIGHT - player.rect.y) // 60 + count2
+        help_count_len = (START_HEIGHT - player.rect.y) // 60 + count1
         show_current_records(help_count_len)
         show_coins(count2)
         player.move(pygame.sprite.spritecollide(player, tiles_group, False))
         if PLAYER_TURN:  # Если заморожены или наоборот происходит разное
-            print('asdfkljb')
             all_sprites.draw(SCREEN)
             SCREEN.blit(fon1, (0, 0))
             SCREEN.blit(hat, (0, 0))
