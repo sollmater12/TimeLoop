@@ -42,14 +42,14 @@ class Connection():
                 UNIQUE
                 NOT NULL,
     record INT  NOT NULL,
-    moneys INT  NOT NULL,
+    moneys INT  NOT NULL
 );
 """
         self.cursor.execute(req)
         request = """SELECT id FROM users WHERE name = ?"""
         result = self.cursor.execute(request, (name,)).fetchone()
-        request = """INSERT INTO records(id, record) VALUES(?, ?)"""
-        self.cursor.execute(request, (result[0], 0))
+        request = """INSERT INTO records(id, record, moneys) VALUES(?, ?, ?)"""
+        self.cursor.execute(request, (result[0], 0, 0))
         self.id = result[0]
 
     def show_records(self):
