@@ -538,8 +538,10 @@ def support_screen():
 
 
 # Меню паузы
-def stop_menu():
+def stop_menu(help_count_len):
     global all_sprites, tiles_group, lava_group, player_group, PLAYER_TURN, count, count1, count2
+    CONNECTION.add_money(count2)
+    CONNECTION.check_record(help_count_len)
     a = True
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
     while a:
@@ -708,7 +710,7 @@ def main_game():
                 stp = load_image('stp.png')
                 SCREEN.blit(stp, (0, 0))
                 pygame.display.flip()
-                stop_menu()
+                stop_menu(help_count_len)
             if (event.type == pygame.MOUSEBUTTONDOWN and 359 <= event.pos[0] <= 507 and 683 <= event.pos[1] <= 900) \
                     or (
                     event.type == pygame.KEYDOWN and event.key == pygame.K_l):  # Смена хода как бы, то есть заморожены плиты или нет
@@ -752,6 +754,15 @@ def main_game():
             SCREEN.blit(clc1, (430, 790))
         if pygame.sprite.spritecollide(player, lava_group, False):  # <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
             print(3)
+            all_sprites.empty()
+            tiles_group.empty()
+            player_group.empty()
+            tele_group.empty()
+            lava_group.empty()
+            kill_group.empty()
+            good_blocks.empty()
+            CONNECTION.add_money(count2)
+            CONNECTION.check_record(help_count_len)
             return end()
         if player.get_coord()[1] > 950: # Смерть при падении
             print(1)
