@@ -781,6 +781,7 @@ def main_game():
 
         if pygame.sprite.spritecollide(player, tele_group, False):  # Переход на новый уровень
             count1 = help_count_len
+            PLAYER_TURN = False
             all_sprites.empty()
             tiles_group.empty()
             player_group.empty()
