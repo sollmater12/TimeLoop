@@ -42,7 +42,7 @@ vec = pygame.math.Vector2
 def load_image(filename, colorkey=None):
     fullname = os.path.join("data/img", filename)
     if not os.path.isfile(fullname):
-        print('File is not found!')
+        # print('File is not found!')
         sys.exit()
     image = pygame.image.load(fullname)
     if colorkey is not None:
@@ -68,15 +68,15 @@ class Player(pygame.sprite.Sprite):
         global START_HEIGHT
         super(Player, self).__init__(player_group, all_sprites)
         self.image = pygame.transform.scale(load_image('player.png'), (25, 43))
-        print(x)
-        print(y)
+        # print(x)
+        # print(y)
         self.rect = self.image.get_rect()
         self.pos = vec(FIRST_X + 15, FIRST_Y - 35)
         START_HEIGHT = FIRST_Y - 35
         self.vel = vec(0, 0)
         self.acc = vec(0, 0.5)
-        print(self.pos[0])
-        print(self.pos[1])
+        # print(self.pos[0])
+        # print(self.pos[1])
         self.rect.x = int(self.pos.x)
         self.rect.y = int(self.pos.y)
         self.isJump = False
@@ -148,7 +148,7 @@ class Field(pygame.sprite.Sprite):
             FIRST_Y = self.rect.y
         elif len(self.fls) == 1:
             t = random.randrange(1, 3)
-            print(t)
+            # print(t)
             if t == 1:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(20, 50)
@@ -539,7 +539,7 @@ def support_screen():
 
 # Меню паузы
 def stop_menu(help_count_len):
-    global all_sprites, tiles_group, lava_group, player_group, PLAYER_TURN, count, count1, count2
+    global all_sprites, tiles_group, lava_group, player_group,tele_group, kill_group, PLAYER_TURN, count, count1, count2
     CONNECTION.add_money(count2)
     CONNECTION.check_record(help_count_len)
     a = True
@@ -549,13 +549,36 @@ def stop_menu(help_count_len):
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and 120 <= event.pos[0] <= 180 and 400 <= event.pos[1] <= 465:
+                all_sprites.empty()
+                tiles_group.empty()
+                player_group.empty()
+                tele_group.empty()
+                lava_group.empty()
+                kill_group.empty()
+                good_blocks.empty()
+                all_sprites = pygame.sprite.Group()  # Создаем группы спрайтов
+                tiles_group = pygame.sprite.Group()
+                player_group = pygame.sprite.Group()
+                tele_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                kill_group = pygame.sprite.Group()
+
                 a = False
             if event.type == pygame.MOUSEBUTTONDOWN and 205 <= event.pos[0] <= 275 and 400 <= event.pos[1] <= 465:
                 a = False
-                all_sprites = pygame.sprite.Group()
+                all_sprites.empty()
+                tiles_group.empty()
+                player_group.empty()
+                tele_group.empty()
+                lava_group.empty()
+                kill_group.empty()
+                good_blocks.empty()
+                all_sprites = pygame.sprite.Group()  # Создаем группы спрайтов
                 tiles_group = pygame.sprite.Group()
-                lava_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
+                tele_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                kill_group = pygame.sprite.Group()
                 PLAYER_TURN = False
                 count2 = 0
                 count1 = 0
@@ -563,10 +586,19 @@ def stop_menu(help_count_len):
                 main_game()
             if event.type == pygame.MOUSEBUTTONDOWN and 290 <= event.pos[0] <= 370 and 400 <= event.pos[1] <= 465:
                 a = False
-                all_sprites = pygame.sprite.Group()
+                all_sprites.empty()
+                tiles_group.empty()
+                player_group.empty()
+                tele_group.empty()
+                lava_group.empty()
+                kill_group.empty()
+                good_blocks.empty()
+                all_sprites = pygame.sprite.Group()  # Создаем группы спрайтов
                 tiles_group = pygame.sprite.Group()
-                lava_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
+                tele_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                kill_group = pygame.sprite.Group()
                 PLAYER_TURN = False
                 count2 = 0
                 count1 = 0
@@ -627,17 +659,35 @@ def end():
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN and 115 <= event.pos[0] <= 195 and 380 <= event.pos[1] <= 450:
                 running = False
-                all_sprites = pygame.sprite.Group()
+                all_sprites.empty()
+                tiles_group.empty()
+                player_group.empty()
+                tele_group.empty()
+                lava_group.empty()
+                kill_group.empty()
+                good_blocks.empty()
+                all_sprites = pygame.sprite.Group()  # Создаем группы спрайтов
                 tiles_group = pygame.sprite.Group()
-                lava_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
+                tele_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                kill_group = pygame.sprite.Group()
                 return main_game()
             if event.type == pygame.MOUSEBUTTONDOWN and 255 <= event.pos[0] <= 340 and 370 <= event.pos[1] <= 450:
                 running = False
-                all_sprites = pygame.sprite.Group()
+                all_sprites.empty()
+                tiles_group.empty()
+                player_group.empty()
+                tele_group.empty()
+                lava_group.empty()
+                kill_group.empty()
+                good_blocks.empty()
+                all_sprites = pygame.sprite.Group()  # Создаем группы спрайтов
                 tiles_group = pygame.sprite.Group()
-                lava_group = pygame.sprite.Group()
                 player_group = pygame.sprite.Group()
+                tele_group = pygame.sprite.Group()
+                lava_group = pygame.sprite.Group()
+                kill_group = pygame.sprite.Group()
                 return start_screen()
 
 
@@ -681,14 +731,22 @@ def main_game():
             tiles_group.add(field)
             good_blocks.add(field)
             fls = field.ret_fls()
-    print(fls)  # Дебаг :)
-    for i in range(random.randrange(1, 4)):  # Генерация плит-убийц
+    # print(fls)  # Дебаг :)
+    num = random.randint(1, 3)
+    if num == 1:
         kill = Killer()
+    elif num == 2:
+        kill = Killer()
+        kill = Killer()
+    else:
+        kill = Killer()
+        kill = Killer()
+        kill = Killer()
+    print(kill_group)
     lava = Lava()
     player = Player(fls[0][0], fls[0][1])
     # coord = player.get_coord()[1]
     cn = Coin()
-
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -753,7 +811,7 @@ def main_game():
             all_sprites.draw(SCREEN)
             SCREEN.blit(clc1, (430, 790))
         if pygame.sprite.spritecollide(player, lava_group, False):  # <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
-            print(3)
+            # print(3)
             all_sprites.empty()
             tiles_group.empty()
             player_group.empty()
