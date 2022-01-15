@@ -152,13 +152,13 @@ class Field(pygame.sprite.Sprite):
             if t == 1:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(20, 50)
-                self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+                self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = 1
             elif t == 2:
                 a = self.fls[-1]
                 self.rect.x = random.randrange(250, 290)
-                self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+                self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = -1
         # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
