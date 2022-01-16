@@ -643,7 +643,7 @@ def stop_menu(help_count_len):
 #         pygame.display.flip()
 
 # Экран смерти - то есть при проигрыше
-def end():
+def end(help_count_len):
     global all_sprites, tiles_group, player_group, kill_group, tele_group, lava_group, PLAYER_TURN, count, count1, count2
     PLAYER_TURN = False
     count2 = 0
@@ -672,6 +672,8 @@ def end():
                 tele_group = pygame.sprite.Group()
                 lava_group = pygame.sprite.Group()
                 kill_group = pygame.sprite.Group()
+                CONNECTION.add_money(count2)
+                CONNECTION.check_record(help_count_len)
                 return main_game()
             if event.type == pygame.MOUSEBUTTONDOWN and 255 <= event.pos[0] <= 340 and 370 <= event.pos[1] <= 450:
                 running = False
@@ -688,6 +690,8 @@ def end():
                 tele_group = pygame.sprite.Group()
                 lava_group = pygame.sprite.Group()
                 kill_group = pygame.sprite.Group()
+                CONNECTION.add_money(count2)
+                CONNECTION.check_record(help_count_len)
                 return start_screen()
 
 
@@ -698,16 +702,15 @@ def show_coins(count):
     SCREEN.blit(string_rendered, (0, 80))
 
 
-count = 0  # Счетчик монет
 count1 = 0  # Счетчик расстояния будет
 count2 = 0
 
 
 # Функция работы основной игры
 def main_game():
-    global PLAYER_TURN, all_sprites, tiles_group, player_group, count, count1, coin, kill_group, tele_group, count1, count2
+    global PLAYER_TURN, all_sprites, tiles_group, player_group, count1, coin, kill_group, tele_group, count1, count2
     SCREEN = pygame.display.set_mode(SIZE_2)
-    help_count_len = count
+    help_count_len = count1
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     hat = load_image('hat.png')
     fon1 = load_image('fon1.png')
@@ -821,7 +824,7 @@ def main_game():
             good_blocks.empty()
             CONNECTION.add_money(count2)
             CONNECTION.check_record(help_count_len)
-            return end()
+            return end(help_count_len)
         if player.get_coord()[1] > 950: # Смерть при падении
             print(1)
             all_sprites.empty()
@@ -833,7 +836,7 @@ def main_game():
             good_blocks.empty()
             CONNECTION.add_money(count2)
             CONNECTION.check_record(help_count_len)
-            return end()
+            return end(help_count_len)
         if pygame.sprite.spritecollide(player, kill_group, False):  # Смерть от плит-убийц
             print(2)
             all_sprites.empty()
@@ -845,7 +848,7 @@ def main_game():
             good_blocks.empty()
             CONNECTION.add_money(count2)
             CONNECTION.check_record(help_count_len)
-            return end()
+            return end(help_count_len)
         if pygame.sprite.spritecollide(player, coin, True):  # Считаем коины
             count2 += 1
         # print(help_count_len)
