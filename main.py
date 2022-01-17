@@ -396,16 +396,19 @@ def registration_screen():
                 sys.exit()
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == login:
-                        if CONNECTION.check_user(input1.check(), input2.check()):
-                            return start_screen()
-                        else:
-                            failed = False
-                    elif event.ui_element == registration:
-                        if CONNECTION.registration(input1.check(), input2.check()):
-                            return start_screen()
-                        else:
-                            failed = False
+                    try:
+                        if event.ui_element == login:
+                            if CONNECTION.check_user(input1.check(), input2.check()):
+                                return start_screen()
+                            else:
+                                failed = False
+                        elif event.ui_element == registration:
+                            if CONNECTION.registration(input1.check(), input2.check()):
+                                return start_screen()
+                            else:
+                                failed = False
+                    except Exception:
+                        failed_text()
             manager.process_events(event)
             input1.handle_event(event)
             input2.handle_event(event)
