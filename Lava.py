@@ -1,6 +1,5 @@
-from main import load_image, all_sprites, FPS
-import pygame
-lava_group = pygame.sprite.Group()
+from main import *
+from configure import *
 
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
 class Lava(pygame.sprite.Sprite):
@@ -9,7 +8,7 @@ class Lava(pygame.sprite.Sprite):
     flag = True
     count = 0
 
-    def __init__(self):
+    def __init__(self, lava_group, all_sprites):
         super().__init__(lava_group, all_sprites)
         self.image = Lava.image1
         self.rect = self.image.get_rect()
@@ -18,6 +17,8 @@ class Lava(pygame.sprite.Sprite):
         self.check_x = 1
         self.vx = 60
         self.image = Lava.image1
+        lava_group.add(self)
+        all_sprites.add(self)
 
     def update(self, *args, **kwargs) -> None:
         self.rect.y -= self.vx / FPS

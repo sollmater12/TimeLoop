@@ -1,23 +1,22 @@
 import os  # ЗДРАВСТВУЙТЕ, КСЕНИЯ АНДРЕЕВНА!
+import random
 import sys
 import time
-import random
 
 import pygame
 import pygame_gui
-import Lava
 
+import Coin
+import Field
+import Killer
+import Lava
+import Player
+import Teleport
+from configure import *
 from database_connect import Connection
 from input_box import InputBox
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)  # Задаем константы
-FPS = 60
-SIZE = WIDTH, HEIGHT = 507, 900
-SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
-START_HEIGHT = 0
-SCREEN = pygame.display.set_mode(SIZE)
-ACC = 0.5
-FRIC = -0.12
 pygame.display.set_caption('TimeLoop')
 
 all_sprites = pygame.sprite.Group()  # Создаем группы спрайтов
@@ -34,9 +33,6 @@ CLOCK = pygame.time.Clock()
 CONNECTION = Connection()
 PLAYER_TURN = False
 
-FIRST_X, FIRST_Y = 0, 0
-
-vec = pygame.math.Vector2
 
 
 # Функция загрузки изображений
@@ -63,206 +59,184 @@ def terminate():
     sys.exit()
 
 
-# Класс персонажа
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        global START_HEIGHT
-        super(Player, self).__init__(player_group, all_sprites)
-        self.image = pygame.transform.scale(load_image('player.png'), (25, 43))
-        # print(x)
-        # print(y)
-        self.rect = self.image.get_rect()
-        self.pos = vec(FIRST_X + 15, FIRST_Y - 35)
-        START_HEIGHT = FIRST_Y - 35
-        self.vel = vec(0, 0)
-        self.acc = vec(0, 0.5)
-        # print(self.pos[0])
-        # print(self.pos[1])
-        self.rect.x = int(self.pos.x)
-        self.rect.y = int(self.pos.y)
-        self.isJump = False
-
-    def change_direction(self, x, y):
-        self.vx = x
-        self.vy = y
-
-    def move(self, check):
-        self.acc = vec(0, 0.1)
-        # pressed_keys = pygame.key.get_pressed()
-        #
-        # if pressed_keys[K_LEFT]:
-        #     self.acc.x = -ACC
-        # if pressed_keys[K_RIGHT]:
-        #     self.acc.x = ACC
-        #
-        # self.acc.x += self.vel.x * FRIC
-        self.vel += self.acc
-        self.pos += self.vel + 0.5 * self.acc
-
-        # if self.pos.x > WIDTH:
-        #     self.pos.x = 0
-        # if self.pos.x < 0:
-        #     self.pos.x = WIDTH
-        # if not check or self.isJump is True:
-        self.rect.midbottom = self.pos
-        self.isJump = False
-        if self.vel.y > 0 and check:
-            self.pos.y = check[0].rect.top + 1
-            self.vel.y = 0
-
-    def update(self, check):
-        if check:
-            if check[-1].rect.x <= 400 and check[-1].check_x == 1:
-                self.pos.x += check[0].vx / FPS
-            if check[-1].rect.x > 400 and check[-1].check_x == 1:
-                self.check_x = -1
-            if check[-1].rect.x >= 5 and check[-1].check_x == -1:
-                self.pos.x -= check[0].vx / FPS
-            if check[-1].rect.x < 5 and check[-1].check_x == -1:
-                self.check_x = 1
-
-    def get_coord(self):
-        return [self.rect.x, self.rect.y]
-
-    def jump(self):
-        hits = pygame.sprite.spritecollide(self, tiles_group, False)
-        if hits:
-            self.vel.y = -4
-
-
-# Класс тайлов, по которым прыгает перс
-class Field(pygame.sprite.Sprite):
-    image = pygame.transform.scale(load_image('check_draw.png'), (50, 13))
-
-    def __init__(self, fls):
-        global FIRST_X, FIRST_Y
-        super().__init__(tiles_group, good_blocks, all_sprites)
-        self.image = Field.image
-        self.rect = self.image.get_rect()
-        self.fls = fls
-        if len(self.fls) == 0:
-            self.rect.x = random.randrange(20, 290)
-            self.rect.y = random.randrange(880, 890)
-            self.fls += [(self.rect.x, self.rect.y)]
-            self.check_x = -1
-            FIRST_X = self.rect.x
-            FIRST_Y = self.rect.y
-        elif len(self.fls) == 1:
-            t = random.randrange(1, 3)
-            # print(t)
-            if t == 1:
-                a = self.fls[-1]
-                self.rect.x = random.randrange(20, 50)
-                self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
-                self.fls += [(self.rect.x, self.rect.y)]
-                self.check_x = 1
-            elif t == 2:
-                a = self.fls[-1]
-                self.rect.x = random.randrange(250, 290)
-                self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
-                self.fls += [(self.rect.x, self.rect.y)]
-                self.check_x = -1
-        # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
-        #     self.rect.x = random.randrange(200, 307)
-        #     self.rect.y = random.randrange(28, 900)
-        else:
-            a = self.fls[-1]
-            if 0 <= a[0] <= 150:
-                b = random.randrange(250, 290)
-                self.check_x = -1
-            else:
-                b = random.randrange(41, 150)
-                self.check_x = 1
-            self.rect.x = random.randrange(b - 40, b)
-            self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
-            self.fls += [(self.rect.x, self.rect.y)]
-        self.vx = random.choice([60, 120, 180])  # Этот параметр отвечает за скорость. Если его менять, то плиты останавливаются в конце экрана
-        self.image = Field.image
-
-    def update(self, *args, **kwargs) -> None:
-        if self.rect.x <= 400 and self.check_x == 1:
-            self.rect.x += self.vx / FPS  # Если же здесь добавить ФПС, то все будет дико лагать. То же самое в классах Телепорт и Киллер. В Лаве же ФПС работает
-        if self.rect.x > 400 and self.check_x == 1:
-            self.check_x = -1
-        if self.rect.x >= 5 and self.check_x == -1:
-            self.rect.x -= self.vx / FPS
-        if self.rect.x < 5 and self.check_x == -1:
-            self.check_x = 1
-        # if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
-        #     self.rect.y += self.vx
-        # if self.rect.y + 1 > self.check_y + 20:
-        #     self.vx = -1
-        #     self.rect.y += self.vx
-        # if self.rect.y <= self.check_y - 20:
-        #     self.vx = 1
-        #     self.rect.y += self.vx
-
-    def ret_fls(self):
-        return self.fls
+# # Класс персонажа
+# class Player(pygame.sprite.Sprite):
+#     def __init__(self, x, y):
+#         global START_HEIGHT
+#         super(Player, self).__init__(player_group, all_sprites)
+#         self.image = pygame.transform.scale(load_image('player.png'), (25, 43))
+#         # print(x)
+#         # print(y)
+#         self.rect = self.image.get_rect()
+#         self.pos = vec(FIRST_X + 15, FIRST_Y - 35)
+#         START_HEIGHT = FIRST_Y - 35
+#         self.vel = vec(0, 0)
+#         self.acc = vec(0, 0.5)
+#         # print(self.pos[0])
+#         # print(self.pos[1])
+#         self.rect.x = int(self.pos.x)
+#         self.rect.y = int(self.pos.y)
+#         self.isJump = False
+#
+#     def change_direction(self, x, y):
+#         self.vx = x
+#         self.vy = y
+#
+#     def move(self, check):
+#         self.acc = vec(0, 0.1)
+#         # pressed_keys = pygame.key.get_pressed()
+#         #
+#         # if pressed_keys[K_LEFT]:
+#         #     self.acc.x = -ACC
+#         # if pressed_keys[K_RIGHT]:
+#         #     self.acc.x = ACC
+#         #
+#         # self.acc.x += self.vel.x * FRIC
+#         self.vel += self.acc
+#         self.pos += self.vel + 0.5 * self.acc
+#
+#         # if self.pos.x > WIDTH:
+#         #     self.pos.x = 0
+#         # if self.pos.x < 0:
+#         #     self.pos.x = WIDTH
+#         # if not check or self.isJump is True:
+#         self.rect.midbottom = self.pos
+#         self.isJump = False
+#         if self.vel.y > 0 and check:
+#             self.pos.y = check[0].rect.top + 1
+#             self.vel.y = 0
+#
+#     def update(self, check):
+#         if check:
+#             if check[-1].rect.x <= 400 and check[-1].check_x == 1:
+#                 self.pos.x += check[0].vx / FPS
+#             if check[-1].rect.x > 400 and check[-1].check_x == 1:
+#                 self.check_x = -1
+#             if check[-1].rect.x >= 5 and check[-1].check_x == -1:
+#                 self.pos.x -= check[0].vx / FPS
+#             if check[-1].rect.x < 5 and check[-1].check_x == -1:
+#                 self.check_x = 1
+#
+#     def get_coord(self):
+#         return [self.rect.x, self.rect.y]
+#
+#     def jump(self):
+#         hits = pygame.sprite.spritecollide(self, tiles_group, False)
+#         if hits:
+#             self.vel.y = -4
 
 
-# Класс плиты, которая перемещает на следующий уровень
-class Teleport(pygame.sprite.Sprite):
-    image = load_image("tile1.png")
+# # Класс тайлов, по которым прыгает перс
+# class Field(pygame.sprite.Sprite):
+#     image = pygame.transform.scale(load_image('check_draw.png'), (50, 13))
+#
+#     def __init__(self, fls):
+#         global FIRST_X, FIRST_Y
+#         super().__init__(tiles_group, good_blocks, all_sprites)
+#         self.image = Field.image
+#         self.rect = self.image.get_rect()
+#         self.fls = fls
+#         if len(self.fls) == 0:
+#             self.rect.x = random.randrange(20, 290)
+#             self.rect.y = random.randrange(880, 890)
+#             self.fls += [(self.rect.x, self.rect.y)]
+#             self.check_x = -1
+#             FIRST_X = self.rect.x
+#             FIRST_Y = self.rect.y
+#         elif len(self.fls) == 1:
+#             t = random.randrange(1, 3)
+#             # print(t)
+#             if t == 1:
+#                 a = self.fls[-1]
+#                 self.rect.x = random.randrange(20, 50)
+#                 self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
+#                 self.fls += [(self.rect.x, self.rect.y)]
+#                 self.check_x = 1
+#             elif t == 2:
+#                 a = self.fls[-1]
+#                 self.rect.x = random.randrange(250, 290)
+#                 self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
+#                 self.fls += [(self.rect.x, self.rect.y)]
+#                 self.check_x = -1
+#         # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
+#         #     self.rect.x = random.randrange(200, 307)
+#         #     self.rect.y = random.randrange(28, 900)
+#         else:
+#             a = self.fls[-1]
+#             if 0 <= a[0] <= 150:
+#                 b = random.randrange(250, 290)
+#                 self.check_x = -1
+#             else:
+#                 b = random.randrange(41, 150)
+#                 self.check_x = 1
+#             self.rect.x = random.randrange(b - 40, b)
+#             self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+#             self.fls += [(self.rect.x, self.rect.y)]
+#         self.vx = random.choice([60, 120, 180])  # Этот параметр отвечает за скорость. Если его менять, то плиты останавливаются в конце экрана
+#         self.image = Field.image
+#
+#     def update(self, *args, **kwargs) -> None:
+#         if self.rect.x <= 400 and self.check_x == 1:
+#             self.rect.x += self.vx / FPS  # Если же здесь добавить ФПС, то все будет дико лагать. То же самое в классах Телепорт и Киллер. В Лаве же ФПС работает
+#         if self.rect.x > 400 and self.check_x == 1:
+#             self.check_x = -1
+#         if self.rect.x >= 5 and self.check_x == -1:
+#             self.rect.x -= self.vx / FPS
+#         if self.rect.x < 5 and self.check_x == -1:
+#             self.check_x = 1
+#         # if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
+#         #     self.rect.y += self.vx
+#         # if self.rect.y + 1 > self.check_y + 20:
+#         #     self.vx = -1
+#         #     self.rect.y += self.vx
+#         # if self.rect.y <= self.check_y - 20:
+#         #     self.vx = 1
+#         #     self.rect.y += self.vx
+#
+#     def ret_fls(self):
+#         return self.fls
 
-    def __init__(self, fls):
-        super().__init__(tele_group, good_blocks, all_sprites)
-        self.image = Teleport.image
-        self.rect = self.image.get_rect()
-        self.fls = fls
-        a = self.fls[-1]
-        self.rect.x = random.randrange(20, 290)
-        self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
-        self.fls += [(self.rect.x, self.rect.y)]
-        direc = [-1, 1]
-        self.check_x = random.choice(direc)
-        self.vx = 1
-        self.image = Teleport.image
 
-    def update(self, *args, **kwargs) -> None:
-        if self.rect.x < 400 and self.check_x == 1:
-            self.rect.x += self.vx
-        if self.rect.x == 400 and self.check_x == 1:
-            self.check_x = -1
-        if self.rect.x > 5 and self.check_x == -1:
-            self.rect.x -= self.vx
-        if self.rect.x == 5 and self.check_x == -1:
-            self.check_x = 1
+# # Класс плиты, которая перемещает на следующий уровень
+# class Teleport(pygame.sprite.Sprite):
+#     image = load_image("tile1.png")
+#
+#     def __init__(self, fls):
+#         super().__init__(tele_group, good_blocks, all_sprites)
+#         self.image = Teleport.image
+#         self.rect = self.image.get_rect()
+#         self.fls = fls
+#         a = self.fls[-1]
+#         self.rect.x = random.randrange(20, 290)
+#         self.rect.y = random.randrange(a[1] - 80, a[1] - 60)
+#         self.fls += [(self.rect.x, self.rect.y)]
+#         direc = [-1, 1]
+#         self.check_x = random.choice(direc)
+#         self.vx = 1
+#         self.image = Teleport.image
+#
+#     def update(self, *args, **kwargs) -> None:
+#         if self.rect.x < 400 and self.check_x == 1:
+#             self.rect.x += self.vx
+#         if self.rect.x == 400 and self.check_x == 1:
+#             self.check_x = -1
+#         if self.rect.x > 5 and self.check_x == -1:
+#             self.rect.x -= self.vx
+#         if self.rect.x == 5 and self.check_x == -1:
+#             self.check_x = 1
+#
+#     def ret_fls(self):
+#         return self.fls
 
-    def ret_fls(self):
-        return self.fls
 
-
-# Класс плиты-убийцы. Ее касаться нельзя
-class Killer(pygame.sprite.Sprite):
-    image = pygame.transform.scale(load_image('tile_kill2.png'), (150, 26))
-
-    def __init__(self):
-        super().__init__(kill_group, all_sprites)
-        self.image = Killer.image
-        self.rect = self.image.get_rect()
-        self.rect.x = -249
-        self.rect.y = random.randrange(60, 700)
-        while pygame.sprite.spritecollide(self, good_blocks, False) or pygame.sprite.spritecollide(self, player_group,
-                                                                                                   False):
-            self.rect.y = random.randrange(60, 880)
-        direc = [-1, 1]
-        self.check_x = random.choice(direc)
-        self.vx = random.choice([60, 120, 180])
-        self.image = Killer.image
-
-    def update(self, *args, **kwargs) -> None:
-        self.rect.x += self.vx / FPS
-        if self.rect.x > 507:
-            self.rect.x = -249
-        # if self.rect.x < 350 and self.check_x == 1:
-        #     self.rect.x += self.vx
-        # if self.rect.x == 350 and self.check_x == 1:
-        #     self.check_x = -1
-        # if self.rect.x > 5 and self.check_x == -1:
-        #     self.rect.x -= self.vx
-        # if self.rect.x == 5 and self.check_x == -1:
-        #     self.check_x = 1
+# if self.rect.x < 350 and self.check_x == 1:
+#     self.rect.x += self.vx
+# if self.rect.x == 350 and self.check_x == 1:
+#     self.check_x = -1
+# if self.rect.x > 5 and self.check_x == -1:
+#     self.rect.x -= self.vx
+# if self.rect.x == 5 and self.check_x == -1:
+#     self.check_x = 1
 
 
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
@@ -287,16 +261,16 @@ class Killer(pygame.sprite.Sprite):
 
 
 # Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделан
-class Coin(pygame.sprite.Sprite):
-    image = pygame.transform.scale(load_image('cn.png'), (50, 50))
-
-    def __init__(self):
-        super().__init__(coin, all_sprites)
-        self.image = Coin.image
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(5, 450)
-        self.rect.y = random.randrange(100, 850)
-        self.image = Coin.image
+# class Coin(pygame.sprite.Sprite):
+#     image = pygame.transform.scale(load_image('cn.png'), (50, 50))
+#
+#     def __init__(self):
+#         super().__init__(coin, all_sprites)
+#         self.image = Coin.image
+#         self.rect = self.image.get_rect()
+#         self.rect.x = random.randrange(5, 450)
+#         self.rect.y = random.randrange(100, 850)
+#         self.image = Coin.image
 
 
 # Функция отрисовки текста на регистрационном окне
@@ -358,12 +332,12 @@ def show_records():
     SCREEN.blit(string_rendered_2, (160, 225))
 
 
+def res(step):
+    text = f'{step} m'
+    font = pygame.font.Font(None, 30)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (10, 100))
 
-# def res(step):
-#     text = f'{step} m'
-#     font = pygame.font.Font(None, 30)
-#     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
-#     SCREEN.blit(string_rendered, (10, 100))
 
 # Рисуем кнопочки в главном меню
 def show_start_label():
@@ -374,11 +348,19 @@ def show_start_label():
     start_label = pygame.transform.scale(load_image('rls.png'), (100, 100))
     SCREEN.blit(start_label, (200, 450))
 
+
 def show_current_records(record):
     text = f'Счет: {record}'
     font = pygame.font.Font(None, 30)
     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
     SCREEN.blit(string_rendered, (0, 60))
+
+
+def show_coins(count):
+    text = f'Монеты: {count}'
+    font = pygame.font.Font(None, 30)
+    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
+    SCREEN.blit(string_rendered, (0, 80))
 
 
 # Отрабатываем ввод текста в рег окне
@@ -540,7 +522,7 @@ def support_screen():
 
 # Меню паузы
 def stop_menu(help_count_len):
-    global all_sprites, tiles_group, lava_group, player_group,tele_group, kill_group, PLAYER_TURN, count, count1, count2
+    global all_sprites, tiles_group, lava_group, player_group, tele_group, kill_group, PLAYER_TURN, count, count1, count2
     CONNECTION.add_money(count2)
     CONNECTION.check_record(help_count_len)
     a = True
@@ -696,20 +678,14 @@ def end(help_count_len):
                 return start_screen()
 
 
-def show_coins(count):
-    text = f'Монеты: {count}'
-    font = pygame.font.Font(None, 30)
-    string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
-    SCREEN.blit(string_rendered, (0, 80))
-
-
 count1 = 0  # Счетчик расстояния будет
 count2 = 0  # Счетчик монет
+COORDS = 0
 
 
 # Функция работы основной игры
 def main_game():
-    global PLAYER_TURN, all_sprites, tiles_group, player_group, count1, coin, kill_group, tele_group, count1, count2
+    global PLAYER_TURN, all_sprites, tiles_group, player_group, count1, coin, kill_group, tele_group, count1, count2, COORDS
     SCREEN = pygame.display.set_mode(SIZE_2)
     help_count_len = count1
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
@@ -726,31 +702,40 @@ def main_game():
     fls = []  # Список с координатами плит
     for i in range(12):  # Генерация плит
         if i == 11:
-            field = Teleport(fls)
+            field = Teleport.Teleport(fls, tele_group, good_blocks, all_sprites)
             tele_group.add(field)
             good_blocks.add(field)
             fls = field.ret_fls()
+        if i == 0:
+            field = Field.Field(fls, tiles_group, good_blocks, all_sprites)
+            COORDS = field.first_coords()
+            tiles_group.add(field)
+            good_blocks.add(field)
+            fls = field.ret_fls()
         else:
-            field = Field(fls)
+            field = Field.Field(fls, tiles_group, good_blocks, all_sprites)
             tiles_group.add(field)
             good_blocks.add(field)
             fls = field.ret_fls()
     # print(fls)  # Дебаг :)
     num = random.randint(1, 3)
     if num == 1:
-        kill = Killer()
+        kill = Killer.Killer(kill_group, all_sprites, good_blocks, player_group)
     elif num == 2:
-        kill = Killer()
-        kill = Killer()
+        kill = Killer.Killer(kill_group, all_sprites, good_blocks, player_group)
+        kill = Killer.Killer(kill_group, all_sprites, good_blocks, player_group)
     else:
-        kill = Killer()
-        kill = Killer()
-        kill = Killer()
+        kill = Killer.Killer(kill_group, all_sprites, good_blocks, player_group)
+        kill = Killer.Killer(kill_group, all_sprites, good_blocks, player_group)
+        kill = Killer.Killer(kill_group, all_sprites, good_blocks, player_group)
     print(kill_group)
-    lava = Lava.Lava()
-    player = Player(fls[0][0], fls[0][1])
+    lava = Lava.Lava(lava_group, all_sprites)
+    lava_group.add(lava)
+    all_sprites.add(lava)
+    x, y = COORDS
+    player = Player.Player(x, y, player_group, all_sprites)
     # coord = player.get_coord()[1]
-    cn = Coin()
+    cn = Coin.Coin()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -759,7 +744,7 @@ def main_game():
                 if event.key == pygame.K_SPACE:  # Прыжок перса
                     if PLAYER_TURN:
                         player.isJump = True
-                        player.jump()
+                        player.jump(tiles_group)
                     # count1 += abs(player.get_coord()[1] - 900 + coord)
             if event.type == pygame.MOUSEBUTTONDOWN and 410 <= event.pos[0] <= 470 and 0 <= event.pos[
                 1] <= 50:  # Ставимся на паузу
@@ -810,13 +795,16 @@ def main_game():
             SCREEN.blit(hat, (0, 0))
             SCREEN.blit(clc, (430, 790))
         else:
-            player.update(pygame.sprite.spritecollide(player, tiles_group, False))
+            check = pygame.sprite.spritecollide(player, tiles_group, False)
+            player.update(check)
+            # tiles_group.update()
             good_blocks.update()
             kill_group.update()
-            Lava.lava_group.update()
+            lava_group.update()
             all_sprites.draw(SCREEN)
             SCREEN.blit(clc1, (430, 790))
-        if pygame.sprite.spritecollide(player, lava_group, False):  # <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
+        if pygame.sprite.spritecollide(player, lava_group,
+                                       False):  # <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
             # print(3)
             all_sprites.empty()
             tiles_group.empty()
@@ -828,7 +816,7 @@ def main_game():
             CONNECTION.add_money(count2)
             CONNECTION.check_record(help_count_len)
             return end(help_count_len)
-        if player.get_coord()[1] > 950: # Смерть при падении
+        if player.get_coord()[1] > 950:  # Смерть при падении
             print(1)
             all_sprites.empty()
             tiles_group.empty()
