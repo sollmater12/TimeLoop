@@ -1,5 +1,5 @@
 from main import *
-from configure import *
+from help_files.configure import *
 
 # Класс персонажа
 class Player(pygame.sprite.Sprite):

@@ -8,6 +8,9 @@ START_HEIGHT = 0
 ACC = 0.5
 FRIC = -0.12
 vec = pygame.math.Vector2
+from database_connect import Connection
+CONNECTION = Connection()
+
 
 pygame.init()
 # Функция загрузки изображений

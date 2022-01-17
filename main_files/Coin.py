@@ -1,5 +1,5 @@
 from main import *
-from configure import load_image
+from help_files.configure import load_image
 
 # Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделан
 class Coin(pygame.sprite.Sprite):

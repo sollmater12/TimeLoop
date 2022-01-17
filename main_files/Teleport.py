@@ -1,5 +1,5 @@
 from main import *
-from configure import *
+from help_files.configure import *
 
 # Класс плиты, которая перемещает на следующий уровень
 class Teleport(pygame.sprite.Sprite):

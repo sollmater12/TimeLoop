@@ -1,4 +1,4 @@
-from configure import *
+from help_files.configure import *
 from main import *
 
 
