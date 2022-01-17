@@ -5,6 +5,7 @@ import random
 
 import pygame
 import pygame_gui
+import Lava
 
 from database_connect import Connection
 from input_box import InputBox
@@ -265,24 +266,24 @@ class Killer(pygame.sprite.Sprite):
 
 
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
-class Lava(pygame.sprite.Sprite):
-    image = load_image("lava1.png")
-    image1 = load_image("lava2.png")
-    flag = True
-    count = 0
-
-    def __init__(self):
-        super().__init__(lava_group, all_sprites)
-        self.image = Lava.image1
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 2400
-        self.check_x = 1
-        self.vx = 60
-        self.image = Lava.image1
-
-    def update(self, *args, **kwargs) -> None:
-        self.rect.y -= self.vx / FPS
+# class Lava(pygame.sprite.Sprite):
+#     image = load_image("lava1.png")
+#     image1 = load_image("lava2.png")
+#     flag = True
+#     count = 0
+#
+#     def __init__(self):
+#         super().__init__(lava_group, all_sprites)
+#         self.image = Lava.image1
+#         self.rect = self.image.get_rect()
+#         self.rect.x = 0
+#         self.rect.y = 2400
+#         self.check_x = 1
+#         self.vx = 60
+#         self.image = Lava.image1
+#
+#     def update(self, *args, **kwargs) -> None:
+#         self.rect.y -= self.vx / FPS
 
 
 # Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделан
@@ -703,7 +704,7 @@ def show_coins(count):
 
 
 count1 = 0  # Счетчик расстояния будет
-count2 = 0
+count2 = 0  # Счетчик монет
 
 
 # Функция работы основной игры
@@ -746,7 +747,7 @@ def main_game():
         kill = Killer()
         kill = Killer()
     print(kill_group)
-    lava = Lava()
+    lava = Lava.Lava()
     player = Player(fls[0][0], fls[0][1])
     # coord = player.get_coord()[1]
     cn = Coin()
@@ -798,7 +799,8 @@ def main_game():
             main_game()
         SCREEN.blit(fon, (0, 0))
         SCREEN.blit(hat, (0, 0))
-        help_count_len = (START_HEIGHT - player.rect.y) // 60 + count1
+        if (START_HEIGHT - player.rect.y) // 60 + count1 >= help_count_len:
+            help_count_len = (START_HEIGHT - player.rect.y) // 60 + count1
         show_current_records(help_count_len)
         show_coins(count2)
         player.move(pygame.sprite.spritecollide(player, tiles_group, False))
@@ -811,7 +813,7 @@ def main_game():
             player.update(pygame.sprite.spritecollide(player, tiles_group, False))
             good_blocks.update()
             kill_group.update()
-            lava_group.update()
+            Lava.lava_group.update()
             all_sprites.draw(SCREEN)
             SCREEN.blit(clc1, (430, 790))
         if pygame.sprite.spritecollide(player, lava_group, False):  # <--- Это закомменчено т к изза него скорее всего вылетает внезапная смерть, а вообще это должна быть смерть от лавы
