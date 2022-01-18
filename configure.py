@@ -16,7 +16,7 @@ vec = pygame.math.Vector2
 
 # Функция загрузки изображений
 def load_image(filename, colorkey=None):
-    fullname = os.path.join("data/img", filename)
+    fullname = os.path.join(filename)
     if not os.path.isfile(fullname):
         # print('File is not found!')
         sys.exit()
