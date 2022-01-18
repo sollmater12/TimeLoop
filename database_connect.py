@@ -3,7 +3,7 @@ import sqlite3
 
 class Connection():
     def __init__(self):
-        self.connection = sqlite3.connect('TimeLoop.sqlite')
+        self.connection = sqlite3.connect('data/databases/TimeLoop.sqlite')
         self.cursor = self.connection.cursor()
         make_table = """CREATE TABLE IF NOT EXISTS users (
             id       INT  PRIMARY KEY

@@ -1,7 +1,7 @@
 import os
-import pygame
 import sys
 
+import pygame
 
 FPS = 60
 SIZE = WIDTH, HEIGHT = 507, 900
@@ -13,10 +13,9 @@ FRIC = -0.12
 vec = pygame.math.Vector2
 
 
-
 # Функция загрузки изображений
 def load_image(filename, colorkey=None):
-    fullname = os.path.join(filename)
+    fullname = os.path.join('data/img', filename)
     if not os.path.isfile(fullname):
         # print('File is not found!')
         sys.exit()
