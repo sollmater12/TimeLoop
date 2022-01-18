@@ -1,12 +1,11 @@
-from main import *
-from help_files.configure import load_image
+import random
+from configure import *
 
 # Класс монетки, которую надо собирать, но еще счетчки их, как и счетчик расстояния и в конечном счете рекорда, не доделан
 class Coin(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('cn.png'), (50, 50))
 
-    def __init__(self):
-        global coin, all_sprites
+    def __init__(self, coin, all_sprites):
         super().__init__(coin, all_sprites)
         self.image = Coin.image
         self.rect = self.image.get_rect()

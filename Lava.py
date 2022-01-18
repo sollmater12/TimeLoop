@@ -1,5 +1,6 @@
-from main import *
-from help_files.configure import *
+from configure import *
+
+
 
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
 class Lava(pygame.sprite.Sprite):

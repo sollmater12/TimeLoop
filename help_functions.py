@@ -19,5 +19,6 @@ def load_image(filename, colorkey=None):
         image = image.convert_alpha()
     return image
 
+
 pygame.init()
 pygame.display.set_mode(main.SIZE)

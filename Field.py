@@ -1,5 +1,5 @@
-from help_files.configure import *
-from main import *
+import random
+from configure import *
 
 
 # Класс тайлов, по которым прыгает перс

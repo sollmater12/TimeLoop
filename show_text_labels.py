@@ -1,7 +1,6 @@
 import pygame_gui
 
 from configure import *
-from main_files.main import CONNECTION
 
 
 # Функция отрисовки текста на регистрационном окне
@@ -53,7 +52,7 @@ def draw_buttons(manager):
 
 
 # Функция показа рекорда из БД в главном меню. Пока рекорд не обновляется, доделаем
-def show_records():
+def show_records(CONNECTION):
     text = f'Мой рекорд: {CONNECTION.show_records()}'
     text_2 = f'Количество монет: {CONNECTION.show_money()}'
     font = pygame.font.Font(None, 30)

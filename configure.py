@@ -1,18 +1,19 @@
-import pygame, os, sys
+import os
+import pygame
+import sys
+
 
 FPS = 60
 SIZE = WIDTH, HEIGHT = 507, 900
 SCREEN = pygame.display.set_mode(SIZE)
 SIZE_2 = WIDTH_2, HEIGHT_2 = 507, 900
-START_HEIGHT = 0
+START_HEIGHT = 900
 ACC = 0.5
 FRIC = -0.12
 vec = pygame.math.Vector2
-from database_connect import Connection
-CONNECTION = Connection()
 
 
-pygame.init()
+
 # Функция загрузки изображений
 def load_image(filename, colorkey=None):
     fullname = os.path.join("data/img", filename)

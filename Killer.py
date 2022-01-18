@@ -1,5 +1,6 @@
-from main import *
-from help_files.configure import *
+from configure import *
+import random
+
 
 # Класс плиты-убийцы. Ее касаться нельзя
 class Killer(pygame.sprite.Sprite):
