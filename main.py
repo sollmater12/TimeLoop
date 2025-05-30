@@ -6,8 +6,8 @@ import random
 import pygame
 import pygame_gui
 
-from database_connect import Connection
-from input_box import InputBox
+from lib.database.database_connect import Connection
+from lib.field.input_box import InputBox
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (750, 30)  # Задаем константы
 FPS = 60
@@ -40,9 +40,9 @@ vec = pygame.math.Vector2
 
 # Функция загрузки изображений
 def load_image(filename, colorkey=None):
-    fullname = os.path.join("data/img", filename)
+    fullname = os.path.join("data/img/game", filename)
     if not os.path.isfile(fullname):
-        # print('File is not found!')
+        print('File is not found!')
         sys.exit()
     image = pygame.image.load(fullname)
     if colorkey is not None:
@@ -68,15 +68,11 @@ class Player(pygame.sprite.Sprite):
         global START_HEIGHT
         super(Player, self).__init__(player_group, all_sprites)
         self.image = pygame.transform.scale(load_image('player.png'), (25, 43))
-        # print(x)
-        # print(y)
         self.rect = self.image.get_rect()
         self.pos = vec(FIRST_X + 15, FIRST_Y - 35)
         START_HEIGHT = FIRST_Y - 35
         self.vel = vec(0, 0)
         self.acc = vec(0, 0.5)
-        # print(self.pos[0])
-        # print(self.pos[1])
         self.rect.x = int(self.pos.x)
         self.rect.y = int(self.pos.y)
         self.isJump = False
@@ -87,22 +83,10 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, check):
         self.acc = vec(0, 0.1)
-        # pressed_keys = pygame.key.get_pressed()
-        #
-        # if pressed_keys[K_LEFT]:
-        #     self.acc.x = -ACC
-        # if pressed_keys[K_RIGHT]:
-        #     self.acc.x = ACC
-        #
-        # self.acc.x += self.vel.x * FRIC
+
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
 
-        # if self.pos.x > WIDTH:
-        #     self.pos.x = 0
-        # if self.pos.x < 0:
-        #     self.pos.x = WIDTH
-        # if not check or self.isJump is True:
         self.rect.midbottom = self.pos
         self.isJump = False
         if self.vel.y > 0 and check:
@@ -161,9 +145,6 @@ class Field(pygame.sprite.Sprite):
                 self.rect.y = random.randrange(a[1] - 100, a[1] - 90)
                 self.fls += [(self.rect.x, self.rect.y)]
                 self.check_x = -1
-        # while len(pygame.sprite.spritecollide(self, tiles_group, False)) != 1:
-        #     self.rect.x = random.randrange(200, 307)
-        #     self.rect.y = random.randrange(28, 900)
         else:
             a = self.fls[-1]
             if 0 <= a[0] <= 150:
@@ -187,14 +168,6 @@ class Field(pygame.sprite.Sprite):
             self.rect.x -= self.vx / FPS
         if self.rect.x < 5 and self.check_x == -1:
             self.check_x = 1
-        # if self.check_y - 20 <= self.rect.y <= self.check_y + 20:
-        #     self.rect.y += self.vx
-        # if self.rect.y + 1 > self.check_y + 20:
-        #     self.vx = -1
-        #     self.rect.y += self.vx
-        # if self.rect.y <= self.check_y - 20:
-        #     self.vx = 1
-        #     self.rect.y += self.vx
 
     def ret_fls(self):
         return self.fls
@@ -254,14 +227,6 @@ class Killer(pygame.sprite.Sprite):
         self.rect.x += self.vx / FPS
         if self.rect.x > 507:
             self.rect.x = -249
-        # if self.rect.x < 350 and self.check_x == 1:
-        #     self.rect.x += self.vx
-        # if self.rect.x == 350 and self.check_x == 1:
-        #     self.check_x = -1
-        # if self.rect.x > 5 and self.check_x == -1:
-        #     self.rect.x -= self.vx
-        # if self.rect.x == 5 and self.check_x == -1:
-        #     self.check_x = 1
 
 
 # Класс условной лавы. Она поднимается с определенной скоростью снизу, заставляя игрока  думать быстрее
@@ -356,13 +321,6 @@ def show_records():
     SCREEN.blit(string_rendered, (180, 200))
     SCREEN.blit(string_rendered_2, (160, 225))
 
-
-
-# def res(step):
-#     text = f'{step} m'
-#     font = pygame.font.Font(None, 30)
-#     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
-#     SCREEN.blit(string_rendered, (10, 100))
 
 # Рисуем кнопочки в главном меню
 def show_start_label():
@@ -469,21 +427,6 @@ def start_screen():
                 pygame.display.flip()
                 time.sleep(0.5)
                 return support_screen()
-            # elif event.type == pygame.MOUSEBUTTONDOWN:
-            #     for i in range(13):
-            #         b = i + 5
-            #         a = load_image(str(b) + '.png')
-            #         SCREEN.blit(a, (event.pos[0] - 450, event.pos[1] - 300))
-            #         pygame.display.flip()
-            #         time.sleep(0.0001)
-            #         fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-            #         start_label_1 = pygame.transform.scale(load_image('strt.png'), (100, 100))
-            #         rules_label = pygame.transform.scale(load_image('rls.png'), (100, 100))
-            #         SCREEN.blit(fon, (0, 0))
-            #         SCREEN.blit(start_label_1, (200, 300))
-            #         SCREEN.blit(rules_label, (200, 450))
-            #         show_records()
-            #         pygame.display.flip()
         pygame.display.flip()
 
 
@@ -607,43 +550,6 @@ def stop_menu(help_count_len):
                 count1 = 0
                 count = 0
                 start_screen()
-
-
-# def end_game_screen():
-#     global all_sprites, tiles_group, lava_group, player_group
-#     SCREEN = pygame.display.set_mode(SIZE_2)
-#     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH_2, HEIGHT_2))
-#     SCREEN.blit(fon, (0, 0))
-#     text = f'Вы проиграли'
-#     font = pygame.font.Font(None, 45)
-#     string_rendered = font.render(text, 1, pygame.Color(0, 0, 0))
-#     SCREEN.blit(string_rendered, (145, 300))
-#     manager = pygame_gui.UIManager((507, 900))
-#     time_delta = CLOCK.tick(60) / 1000.0
-#     restart, menu = draw_buttons_2(manager)
-#     while True:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 terminate()
-#             if event.type == pygame.USEREVENT:
-#                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-#                     if event.ui_element == restart:
-#                         all_sprites = pygame.sprite.Group()
-#                         tiles_group = pygame.sprite.Group()
-#                         lava_group = pygame.sprite.Group()
-#                         player_group = pygame.sprite.Group()
-#                         return main_game()
-#                     elif event.ui_element == menu:
-#                         all_sprites = pygame.sprite.Group()
-#                         tiles_group = pygame.sprite.Group()
-#                         lava_group = pygame.sprite.Group()
-#                         player_group = pygame.sprite.Group()
-#                         return start_screen()
-#             manager.process_events(event)
-#         manager.update(time_delta)
-#         manager.draw_ui(SCREEN)
-#         CLOCK.tick(FPS)
-#         pygame.display.flip()
 
 # Экран смерти - то есть при проигрыше
 def end(help_count_len):
