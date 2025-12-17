@@ -1,6 +1,6 @@
 # Проект “TimeLoop”
 
-**created by _Kuba Andrey_ and _Drugov Ivan_**
+**created by _Kuba Andrey_ (@sollmater12) and _Drugov Ivan_ (@vanyadr)**
 
 ## **TimeLoop** 
     - интересная аркадная игра, которая увлечет не только малышей, но и взрослых людей, желающих с удовольствием скоротать время. 
